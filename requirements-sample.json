@@ -1,0 +1,25 @@
+{
+  "php": {
+    "version": 5.3,
+    "extensions": [
+      "curl"
+    ]
+  },
+  "mysql": {
+    "version": 5.1
+  },
+  "wordpress": {
+    "version": 3.8,
+    "plugins": {
+      "buddypress/bp-loader.php": 2.2
+    },
+    "theme": {
+      "hueman": 2.0
+    }
+  },
+  "params": {
+    "redirect_url": "https//google.com",
+    "locale": "wp-requirements",
+    "version_compare_operator": ">="
+  }
+}
