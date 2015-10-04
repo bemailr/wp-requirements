@@ -206,7 +206,7 @@ class WP_Requirements {
 		$json_file = $this->search_json();
 		$json_data = '{}';
 
-		if ( $json_file ) {
+		if ( $json_file !== '' ) {
 			$json_data = file_get_contents( $json_file );
 		}
 
@@ -220,7 +220,7 @@ class WP_Requirements {
 			return $path;
 		}
 
-		return false;
+		return '';
 	}
 
 	protected function parse_json( $json ) {
