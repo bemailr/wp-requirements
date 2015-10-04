@@ -15,7 +15,7 @@ checks:
         no_underscore_prefix_in_properties: false
         no_underscore_prefix_in_methods: false
         blank_line_after_namespace_declaration: false
-        single_namespace_per_use: true
+        single_namespace_per_use: false
         psr2_switch_declaration: true
         psr2_control_structure_declaration: false
         avoid_superglobals: false
@@ -27,7 +27,7 @@ checks:
         return_doc_comments: true
         return_doc_comment_if_not_inferrable: true
         prefer_while_loop_over_for_loop: true
-        parameter_doc_comments: true
+        parameter_doc_comments: false
         optional_parameters_at_the_end: true
         no_short_variable_names:
             minimum: '3'
