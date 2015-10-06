@@ -49,3 +49,15 @@ coding_style:
         indentation:
             general:
                 use_tabs: true
+        spaces:
+            within:
+                brackets: true
+                array_initializer: true
+                grouping: true
+                function_call: true
+                function_declaration: true
+                if: true
+                for: true
+                while: true
+                switch: true
+                catch: true
