@@ -45,4 +45,7 @@ checks:
 
 filter: {  }
 coding_style:
-    php: {  }
+    php:
+        indentation:
+            general:
+                use_tabs: true
