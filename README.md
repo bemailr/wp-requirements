@@ -46,7 +46,8 @@ $wpr_test = array(
 );
 
 /**
- * Now you need to prevent both plugin activation and functioning if the site doesn't meet requirements
+ * Now you need to prevent both plugin activation and functioning 
+ * if the site doesn't meet requirements
  */
  
 // Check on plugin activation
