@@ -16,10 +16,11 @@ This includes (or will include in future releases):
 // Don't forget to include this library into the main file of your plugin
 include( __DIR__ . '/lib/wp-requirements.php' );
 
-// init your requirements globally in your main plugin file
+// Init your requirements globally in your main plugin file
 // or use any function that will return all that:
 global $wpr_test;
-// any option can be omitted
+
+// Any options can be omitted
 $wpr_test = array(
 	'php'       => array(
 		'version'    => 5.3,
@@ -48,8 +49,9 @@ $wpr_test = array(
  * Now you need to prevent both plugin activation and functioning if the site doesn't meet requirements
  */
  
-// Check in admin area on plugin activation
+// Check on plugin activation
 register_activation_hook( __FILE__, 'your_plugin_activation' );
+
 function your_plugin_activation() {
 	global $wpr_test;
 

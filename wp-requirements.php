@@ -210,14 +210,7 @@ class WP_Requirements {
 	 * @return bool
 	 */
 	public function valid() {
-
-		if ( $this->in_array_recursive( false, $this->results ) ) {
-			// we failed some checks, requirements are not met
-			return false;
-		}
-
-		// everything is ok, green light
-		return true;
+		return ! $this->in_array_recursive( false, $this->results );
 	}
 
 	/**
