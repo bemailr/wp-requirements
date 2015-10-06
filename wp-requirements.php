@@ -5,11 +5,11 @@
  * You can use this plugin to check, that PHP, MySQL and WordPress (version, plugins, themes) meet requirements
  * to make your code in a plugin or theme work.
  *
- * You can define those rules as both array or a JSON file. For an example json file see the requirements-sample.json.
+ * You can define those rules as both array or a JSON file (soon). For an example json file see the requirements-sample.json.
  * Copy that file to a new one without "-sample" in the file name part and adjust data to your needs.
  * You can place this file in such place (that this class with search in):
  * 1. The same folder as this file.
- * 2. Root plugin or theme directory (usually, '/wp-content/plugins/your-plugin/requirements.json').
+ * 2. Root plugin or theme directory (usually, '/wp-content/plugins/your-plugin/wp-requirements.json').
  * 3. Root of WordPress install.
  */
 
@@ -20,35 +20,48 @@ if ( class_exists( 'WP_Requirements' ) ) {
 
 class WP_Requirements {
 
-	const VERSION = '1.0';
+	const VERSION = '0.1';
 
 	public $results = array();
 
-	public $redirect_url;
+	public $requirements_details_url = '';
 	public $locale                   = 'wp-requirements';
 	public $version_compare_operator = '>=';
+	public $not_valid_actions        = array( 'deactivate', 'admin_notice' );
 
-	public function __construct( $requrements = array() ) {
+	/**
+	 * WP_Requirements constructor.
+	 *
+	 * @param array $requirements
+	 */
+	public function __construct( $requirements = array() ) {
 
-		if ( empty( $requrements ) ) {
-			$requrements = $this->load_json();
-		}
+		// JSON will be ready next time
+		//if ( empty( $requirements ) ) {
+		//	$requirements = $this->load_json();
+		//}
 
 		// heavy processing here
-		$this->validate_requirements( $requrements );
+		$this->validate_requirements( $requirements );
 	}
 
-	protected function validate_requirements( Array $requrements ) {
+	/**
+	 * All the requirements will be checked and become accesible here:
+	 *     $this->results
+	 *
+	 * @param array $requirements
+	 */
+	protected function validate_requirements( $requirements ) {
 
-		if ( empty( $requrements ) ) {
+		if ( empty( $requirements ) ) {
 			return;
 		}
 
-		if ( ! empty( $requrements['params'] ) ) {
-			$this->set_params( $requrements['params'] );
+		if ( ! empty( $requirements['params'] ) ) {
+			$this->set_params( $requirements['params'] );
 		}
 
-		foreach ( $requrements as $key => $data ) {
+		foreach ( $requirements as $key => $data ) {
 			switch ( $key ) {
 				case 'php':
 					$this->validate_php( $data );
@@ -70,8 +83,9 @@ class WP_Requirements {
 	 */
 	protected function set_params( $params ) {
 		$this->locale                   = ! empty( $params['locale'] ) ? wp_strip_all_tags( (string) $params['locale'] ) : $this->locale;
-		$this->redirect_url             = ! empty( $params['redirect_url'] ) ? esc_url( (string) $params['redirect_url'] ) : $this->redirect_url;
+		$this->requirements_details_url = ! empty( $params['requirements_details_url'] ) ? esc_url( (string) $params['requirements_details_url'] ) : $this->requirements_details_url;
 		$this->version_compare_operator = ! empty( $params['version_compare_operator'] ) ? (string) $params['version_compare_operator'] : $this->version_compare_operator;
+		$this->not_valid_actions        = ! empty( $params['not_valid_actions'] ) ? (array) $params['not_valid_actions'] : $this->not_valid_actions;
 	}
 
 	/**
@@ -175,6 +189,12 @@ class WP_Requirements {
 		$this->results['wordpress'] = $result;
 	}
 
+	/**
+	 * Get the MySQL version number based on data in global WPDB class
+	 *
+	 * @uses WPDB $wpdb
+	 * @return string MySQL version number, like 5.5
+	 */
 	private function get_current_mysql_ver() {
 		global $wpdb;
 
@@ -182,14 +202,100 @@ class WP_Requirements {
 		return substr( $wpdb->dbh->server_info, 0, strpos( $wpdb->dbh->server_info, '-' ) );
 	}
 
-	public function is_met() {
+	/**
+	 * Check that requirements are met.
+	 * If any of rules are failed, the whole check will return false.
+	 * True otherwise.
+	 *
+	 * @return bool
+	 */
+	public function valid() {
 
+		if ( $this->in_array_recursive( false, $this->results ) ) {
+			// we failed some checks, requirements are not met
+			return false;
+		}
 
+		// everything is ok, green light
 		return true;
 	}
 
-	public function notify() {
-		add_action( 'admin_notice', array( $this, 'format_message' ) );
+	/**
+	 * Get the list of registered actions and do everything defined by them
+	 */
+	public function process_failure() {
+		foreach ( $this->not_valid_actions as $action ) {
+			switch ( $action ) {
+				case 'deactivate':
+					$plugin_dir  = explode( '/', plugin_basename( __FILE__ ) );
+					$plugin_file = array_keys( get_plugins( '/' . $plugin_dir[0] ) );
+
+					deactivate_plugins( $plugin_dir[0] . '/' . $plugin_file[0], true );
+
+					if ( isset( $_GET['activate'] ) ) {
+						unset( $_GET['activate'] );
+					}
+					break;
+
+				case 'admin_notice':
+					add_action( 'admin_notices', array( $this, 'disply_admin_notice' ) );
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Does $haystack contain $needle in any of the values?
+	 * Adapted to our needs, works with arrays in arrays
+	 *
+	 * @param mixed $needle What to search
+	 * @param array $haystack Where to search
+	 *
+	 * @return bool
+	 */
+	private function in_array_recursive( $needle, $haystack ) {
+		foreach ( $haystack as $type => $v ) {
+			if ( $needle === $v ) { // useful for recursion only
+				return true;
+			} elseif ( is_array( $v ) ) {
+				// basically checks only version value
+				if ( in_array( $needle, $v, true ) ) {
+					return true;
+				}
+
+				// now, time for recursion
+				if ( ! $this->in_array_recursive( $needle, $v ) ) {
+					continue;
+				} else {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Display an admin notice in WordPress admin area
+	 */
+	public function disply_admin_notice() {
+		$plugin_dir  = explode( '/', plugin_basename( __FILE__ ) );
+		$plugin_data = array_values( get_plugins( '/' . $plugin_dir[0] ) );
+
+		echo '<div class="notice is-dismissible error"><p>';
+
+		printf(
+			__( '%s can\'t be activated because your site doesn\'t meet plugin requirements.', $this->locale ),
+			'<strong>' . $plugin_data[0]['Name'] . '</strong>'
+		);
+		if ( ! empty( $this->requirements_details_url ) ) {
+			printf(
+				' ' . __( 'Please read more details <a href="%s">here</a>.', $this->locale ),
+				esc_url( $this->requirements_details_url )
+			);
+		}
+
+		echo '</p></div>';
 	}
 
 	/********************************
@@ -213,6 +319,9 @@ class WP_Requirements {
 		return $this->parse_json( $json_data );
 	}
 
+	/**
+	 * @return string Path to a found json file
+	 */
 	protected function search_json() {
 		$path = __DIR__ . '/wp-requirements.json';
 
@@ -223,6 +332,11 @@ class WP_Requirements {
 		return '';
 	}
 
+	/**
+	 * @param string $json
+	 *
+	 * @return array
+	 */
 	protected function parse_json( $json ) {
 		return (array) json_decode( $json );
 	}
