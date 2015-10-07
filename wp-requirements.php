@@ -235,7 +235,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 						break;
 
 					case 'admin_notice':
-						add_action( 'admin_notices', array( $this, 'disply_admin_notice' ) );
+						add_action( 'admin_notices', array( $this, 'display_admin_notice' ) );
 						break;
 				}
 			}
@@ -244,7 +244,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		/**
 		 * Display an admin notice in WordPress admin area
 		 */
-		public function disply_admin_notice() {
+		public function display_admin_notice() {
 			echo '<div class="notice is-dismissible error"><p>';
 
 			printf(
