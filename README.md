@@ -21,7 +21,7 @@ There are several ways to define your own requirements:
 
 ```php
 // Don't forget to include this library into the main file of your plugin
-include( __DIR__ . '/lib/wp-requirements.php' );
+include( dirname( __FILE__ ) . '/lib/wp-requirements.php' );
 
 // Init your requirements globally in your main plugin file
 // or use any function that will return all that:
