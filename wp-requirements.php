@@ -1,16 +1,17 @@
 <?php
 /**
- * Class WP_Requirementsfor checking server and site for meeting your code requirements
+ * Class WP_Requirements for checking server and site for meeting your code requirements
  *
- * You can use this plugin to check, that PHP, MySQL and WordPress (version, plugins, themes) meet requirements
- * to make your code in a plugin or theme work.
+ * You can use this class to check, that PHP, MySQL and WordPress (version, plugins, themes) meet requirements
+ * to make your code in a plugin work.
  *
  * You can define those rules as both array or a JSON file (soon). For an example json file see the requirements-sample.json.
  * Copy that file to a new one without "-sample" in the file name part and adjust data to your needs.
  * You can place this file in such place (that this class with search in):
  * 1. The same folder as this file.
- * 2. Root plugin or theme directory (usually, '/wp-content/plugins/your-plugin/wp-requirements.json').
- * 3. Root of WordPress install.
+ * 2. Root plugin directory (usually, '/wp-content/plugins/your-plugin/wp-requirements.json').
+ * 3. WP_CONTENT_DIR
+ * 4. Root of WordPress install.
  */
 
 // Do not load the class twice. Although there might be compatibility issues.
@@ -20,7 +21,7 @@ if ( class_exists( 'WP_Requirements' ) ) {
 
 class WP_Requirements {
 
-	const VERSION = '0.1';
+	const VERSION = '1.0';
 
 	public $results = array();
 
@@ -29,20 +30,42 @@ class WP_Requirements {
 	public $version_compare_operator = '>=';
 	public $not_valid_actions        = array( 'deactivate', 'admin_notice' );
 
+	private $plugin = array();
+
 	/**
 	 * WP_Requirements constructor.
 	 *
 	 * @param array $requirements
 	 */
 	public function __construct( $requirements = array() ) {
+		// plugin information is always required, so get it once
+		$this->set_plugin();
 
-		// JSON will be ready next time
-		//if ( empty( $requirements ) ) {
-		//	$requirements = $this->load_json();
-		//}
+		// Requirements can be specified in JSON file
+		if ( empty( $requirements ) ) {
+			$requirements = $this->load_json();
+		}
 
 		// heavy processing here
 		$this->validate_requirements( $requirements );
+	}
+
+	/**
+	 * Set paths, name etc for a plugin
+	 */
+	protected function set_plugin() {
+		$plugin_dir  = explode( '/', plugin_basename( __FILE__ ) );
+		$plugin      = get_plugins( '/' . $plugin_dir[0] );
+		$plugin_file = array_keys( $plugin );
+		//$plugin_data = array_values( $plugin );
+
+		$this->plugin = array(
+			'dirname'  => $plugin_dir[0],
+			'filename' => $plugin_file[0],
+			'name'     => $plugin[ $plugin_file[0] ]['Name'],
+			'basename' => $plugin_dir[0] . '/' . $plugin_file[0],
+			'fullpath' => wp_normalize_path( WP_PLUGIN_DIR ) . '/' . $plugin_dir[0]
+		);
 	}
 
 	/**
@@ -190,19 +213,6 @@ class WP_Requirements {
 	}
 
 	/**
-	 * Get the MySQL version number based on data in global WPDB class
-	 *
-	 * @uses WPDB $wpdb
-	 * @return string MySQL version number, like 5.5
-	 */
-	private function get_current_mysql_ver() {
-		global $wpdb;
-
-		/** @var Stdclass $wpdb */
-		return substr( $wpdb->dbh->server_info, 0, strpos( $wpdb->dbh->server_info, '-' ) );
-	}
-
-	/**
 	 * Check that requirements are met.
 	 * If any of rules are failed, the whole check will return false.
 	 * True otherwise.
@@ -220,10 +230,7 @@ class WP_Requirements {
 		foreach ( $this->not_valid_actions as $action ) {
 			switch ( $action ) {
 				case 'deactivate':
-					$plugin_dir  = explode( '/', plugin_basename( __FILE__ ) );
-					$plugin_file = array_keys( get_plugins( '/' . $plugin_dir[0] ) );
-
-					deactivate_plugins( $plugin_dir[0] . '/' . $plugin_file[0], true );
+					deactivate_plugins( $this->get_plugin( 'basename' ), true );
 
 					if ( isset( $_GET['activate'] ) ) {
 						unset( $_GET['activate'] );
@@ -235,6 +242,26 @@ class WP_Requirements {
 					break;
 			}
 		}
+	}
+
+	/**
+	 * Display an admin notice in WordPress admin area
+	 */
+	public function disply_admin_notice() {
+		echo '<div class="notice is-dismissible error"><p>';
+
+		printf(
+			__( '%s can\'t be activated because your site doesn\'t meet plugin requirements.', $this->locale ),
+			'<strong>' . $this->get_plugin( 'name' ) . '</strong>'
+		);
+		if ( ! empty( $this->requirements_details_url ) ) {
+			printf(
+				' ' . __( 'Please read more details <a href="%s">here</a>.', $this->locale ),
+				esc_url( $this->requirements_details_url )
+			);
+		}
+
+		echo '</p></div>';
 	}
 
 	/**
@@ -269,26 +296,37 @@ class WP_Requirements {
 	}
 
 	/**
-	 * Display an admin notice in WordPress admin area
+	 * Get the MySQL version number based on data in global WPDB class
+	 *
+	 * @uses WPDB $wpdb
+	 * @return string MySQL version number, like 5.5
 	 */
-	public function disply_admin_notice() {
-		$plugin_dir  = explode( '/', plugin_basename( __FILE__ ) );
-		$plugin_data = array_values( get_plugins( '/' . $plugin_dir[0] ) );
+	private function get_current_mysql_ver() {
+		global $wpdb;
 
-		echo '<div class="notice is-dismissible error"><p>';
+		/** @var Stdclass $wpdb */
+		return substr( $wpdb->dbh->server_info, 0, strpos( $wpdb->dbh->server_info, '-' ) );
+	}
 
-		printf(
-			__( '%s can\'t be activated because your site doesn\'t meet plugin requirements.', $this->locale ),
-			'<strong>' . $plugin_data[0]['Name'] . '</strong>'
-		);
-		if ( ! empty( $this->requirements_details_url ) ) {
-			printf(
-				' ' . __( 'Please read more details <a href="%s">here</a>.', $this->locale ),
-				esc_url( $this->requirements_details_url )
-			);
+	/**
+	 * Retrieve current plugin data, like paths, name etc
+	 *
+	 * @param string $data
+	 *
+	 * @return mixed
+	 */
+	public function get_plugin( $data = '' ) {
+		// get all the data
+		if ( empty( $data ) ) {
+			return $this->plugin;
 		}
 
-		echo '</p></div>';
+		// get specific plugin data
+		if ( ! empty( $this->plugin[ $data ] ) ) {
+			return $this->plugin[ $data ];
+		}
+
+		return null;
 	}
 
 	/********************************
@@ -296,10 +334,7 @@ class WP_Requirements {
 	 *******************************/
 
 	/**
-	 * Load requirements.json, uses hierarchy:
-	 * 1) the same path as __FILE__
-	 * 2) plugin/theme base path
-	 * 3) WordPress ABSPATH
+	 * Load requirements.json
 	 */
 	protected function load_json() {
 		$json_file = $this->search_json();
@@ -313,11 +348,33 @@ class WP_Requirements {
 	}
 
 	/**
+	 * Search for a JSON file in different places
+	 *
 	 * @return string Path to a found json file
 	 */
 	protected function search_json() {
-		$path = __DIR__ . '/wp-requirements.json';
+		$file = '/wp-requirements.json';
 
+		// 1) Search in this same folder
+		$path = wp_normalize_path( __DIR__ . $file );
+		if ( file_exists( $path ) ) {
+			return $path;
+		}
+
+		// 2) Plugin base path
+		$path = $this->get_plugin( 'fullpath' ) . $file;
+		if ( file_exists( $path ) ) {
+			return $path;
+		}
+
+		// 3) WP_CONTENT_DIR
+		$path = WP_CONTENT_DIR . $file;
+		if ( file_exists( $path ) ) {
+			return $path;
+		}
+
+		// 4) WordPress base bath
+		$path = ABSPATH . $file;
 		if ( file_exists( $path ) ) {
 			return $path;
 		}
@@ -331,6 +388,6 @@ class WP_Requirements {
 	 * @return array
 	 */
 	protected function parse_json( $json ) {
-		return (array) json_decode( $json );
+		return json_decode( $json, true );
 	}
 }
