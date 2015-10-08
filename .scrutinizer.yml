@@ -50,6 +50,9 @@ coding_style:
             general:
                 use_tabs: true
         spaces:
+            around_operators:
+                concatenation: true
+                negation: true
             within:
                 brackets: true
                 array_initializer: true
