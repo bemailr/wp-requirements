@@ -64,3 +64,7 @@ coding_style:
                 while: true
                 switch: true
                 catch: true
+tools:
+    php_code_sniffer:
+        config:
+            standard: "WordPress"
