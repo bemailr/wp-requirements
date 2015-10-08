@@ -52,10 +52,13 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 * Set paths, name etc for a plugin
 		 */
 		protected function set_plugin() {
+			if ( ! function_exists( 'get_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
 			$plugin_dir  = explode( '/', plugin_basename( __FILE__ ) );
 			$plugin      = get_plugins( '/' . $plugin_dir[0] );
 			$plugin_file = array_keys( $plugin );
-			//$plugin_data = array_values( $plugin );
 
 			$this->plugin = array(
 				'dirname'  => $plugin_dir[0],
