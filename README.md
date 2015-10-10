@@ -107,6 +107,16 @@ if ( ! $requirements->valid() ) {
 }
 ```
 
+## Params
+
+Can modify some parts of the logic
+
+* `requirements_details_url` - default is ` ` (empty). Gives ability to define an URL that will be displayed instead of the default complete list of successful and falsy checks against requirements. Useful if the list is quite big and/or if you provide such information on a special page in either WordPress admin area or on your own site.
+* `locale` - default is `wp-requirements`. Gives ability to define a domain locale, that will be used to translate default messages in this class using your own `po`/`mo` files.
+* `version_compare_operator` - default is `>=`. Gives ability to finer define rules to compare versions. Other possible values are those, that are supported by [version_compare()](http://php.net/manual/en/function.version-compare.php)
+* `not_valid_actions` - default is `array( 'deactivate', 'admin_notice' )`. Gives ability to define what should be done on plugin activated if requirements are **not** met.
+
+
 ---
 
 Enjoy!

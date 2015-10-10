@@ -19,14 +19,18 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 
 	class WP_Requirements {
 
-		const VERSION = '1.0';
+		const VERSION = '1.1';
 
-		public $results = array();
+		public $results  = array();
+		public $required = array();
 
 		public $requirements_details_url = '';
 		public $locale                   = 'wp-requirements';
 		public $version_compare_operator = '>=';
 		public $not_valid_actions        = array( 'deactivate', 'admin_notice' );
+
+		private $icon_good = '<span class="dashicons dashicons-yes"></span>&nbsp';
+		private $icon_bad  = '<span class="dashicons dashicons-minus"></span>&nbsp';
 
 		private $plugin = array();
 
@@ -106,7 +110,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 */
 		protected function set_params( $params ) {
 			$this->locale                   = ! empty( $params['locale'] ) ? wp_strip_all_tags( (string) $params['locale'] ) : $this->locale;
-			$this->requirements_details_url = ! empty( $params['requirements_details_url'] ) ? esc_url( (string) $params['requirements_details_url'] ) : $this->requirements_details_url;
+			$this->requirements_details_url = ! empty( $params['requirements_details_url'] ) ? esc_url( trim( (string) $params['requirements_details_url'] ) ) : $this->requirements_details_url;
 			$this->version_compare_operator = ! empty( $params['version_compare_operator'] ) ? (string) $params['version_compare_operator'] : $this->version_compare_operator;
 			$this->not_valid_actions        = ! empty( $params['not_valid_actions'] ) ? (array) $params['not_valid_actions'] : $this->not_valid_actions;
 		}
@@ -117,13 +121,13 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 * @param array $php
 		 */
 		protected function validate_php( $php ) {
-			$result = array();
+			$result = $required = array();
 
 			foreach ( $php as $type => $data ) {
 				switch ( $type ) {
 					case 'version':
-						$result[ $type ] = version_compare( phpversion(), $data, $this->version_compare_operator );
-
+						$result[ $type ]   = version_compare( phpversion(), $data, $this->version_compare_operator );
+						$required[ $type ] = $data;
 						break;
 
 					case 'extensions':
@@ -133,6 +137,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 						foreach ( $data as $extension ) {
 							if ( $extension && is_string( $extension ) ) {
 								$result[ $type ][ $extension ] = extension_loaded( $extension );
+								$required[ $type ][]           = $extension;
 							}
 						}
 
@@ -140,7 +145,8 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 				}
 			}
 
-			$this->results['php'] = $result;
+			$this->results['php']  = $result;
+			$this->required['php'] = $required;
 		}
 
 		/**
@@ -150,7 +156,8 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 */
 		protected function validate_mysql( $mysql ) {
 			if ( ! empty( $mysql['version'] ) ) {
-				$this->results['mysql']['version'] = version_compare( $this->get_current_mysql_ver(), $mysql['version'], $this->version_compare_operator );
+				$this->results['mysql']['version']  = version_compare( $this->get_current_mysql_ver(), $mysql['version'], $this->version_compare_operator );
+				$this->required['mysql']['version'] = $mysql['version'];
 			}
 		}
 
@@ -162,12 +169,13 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		protected function validate_wordpress( $wordpress ) {
 			global $wp_version;
 
-			$result = array();
+			$result = $required = array();
 
 			foreach ( $wordpress as $type => $data ) {
 				switch ( $type ) {
 					case 'version':
-						$result[ $type ] = version_compare( $wp_version, $data, '>=' );
+						$result[ $type ]   = version_compare( $wp_version, $data, '>=' );
+						$required[ $type ] = $data;
 						break;
 
 					case 'plugins':
@@ -181,8 +189,9 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 							if ( $plugin && is_string( $plugin ) ) {
 								// check that it's active
 
-								$raw_Data                   = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, false, false );
-								$result[ $type ][ $plugin ] = is_plugin_active( $plugin ) && version_compare( $raw_Data['Version'], $version, $this->version_compare_operator );
+								$raw_Data                     = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, false, false );
+								$result[ $type ][ $plugin ]   = is_plugin_active( $plugin ) && version_compare( $raw_Data['Version'], $version, $this->version_compare_operator );
+								$required[ $type ][ $plugin ] = $version;
 							}
 						}
 
@@ -203,13 +212,16 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 							} else {
 								$result[ $type ][ $slug ] = false;
 							}
+
+							$required[ $type ][ $slug ] = $version;
 						}
 
 						break;
 				}
 			}
 
-			$this->results['wordpress'] = $result;
+			$this->results['wordpress']  = $result;
+			$this->required['wordpress'] = $required;
 		}
 
 		/**
@@ -227,6 +239,10 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 * Get the list of registered actions and do everything defined by them
 		 */
 		public function process_failure() {
+			if ( empty( $this->results ) || empty( $this->not_valid_actions ) ) {
+				return;
+			}
+
 			foreach ( $this->not_valid_actions as $action ) {
 				switch ( $action ) {
 					case 'deactivate':
@@ -248,20 +264,138 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 * Display an admin notice in WordPress admin area
 		 */
 		public function display_admin_notice() {
-			echo '<div class="notice is-dismissible error"><p>';
+			echo '<div class="notice is-dismissible error">';
+
+			echo '<p>';
 
 			printf(
-				__( '%s can\'t be activated because your site doesn\'t meet plugin requirements.', $this->locale ),
+				__( '%s can\'t be activated because your site doesn\'t meet all requirements.', $this->locale ),
 				'<strong>' . $this->get_plugin( 'name' ) . '</strong>'
 			);
+
+			echo '</p>';
+
+			// Display the link to more details, if we have it
 			if ( ! empty( $this->requirements_details_url ) ) {
 				printf(
-					' ' . __( 'Please read more details <a href="%s">here</a>.', $this->locale ),
+					'<p>' . __( 'Please read more details <a href="%s">here</a>.', $this->locale ) . '</p>',
 					esc_url( $this->requirements_details_url )
 				);
+			} else { // so we need to display all the failures in a notice
+				echo '<ul>';
+				foreach ( $this->results as $type => $data ) {
+					echo $this->format_php_mysql_notice( $type, $data );
+				}
+				echo '</ul>';
+
 			}
 
-			echo '</p></div>';
+			echo '</div>';
+		}
+
+		/**
+		 * Prepare a string, that will be displayed in a row for PHP and MySQL only
+		 *
+		 * @param string $type What's the type of the data: php or mysql
+		 * @param array $data Contains version and extensions keys with their values
+		 *
+		 * @return string $result
+		 */
+		private function format_php_mysql_notice( $type, $data ) {
+			$string_version        = __( '%s: current %s, required %s', $this->locale );
+			$string_ext_loaded     = __( '%s is activated', $this->locale );
+			$string_ext_not_loaded = __( '%s is not activated', $this->locale );
+			$string_wp_loaded      = __( '%s of a valid version %s is activated', $this->locale );
+			$string_wp_not_loaded  = __( '%s of a valid version %s is not activated', $this->locale );
+
+			$message = array();
+
+			foreach ( $data as $key => $value ) { // version : 5.5 || extensions : [curl,mysql]
+				$section = $cur_version = '';
+
+				if ( $type === 'php' ) {
+					switch ( $key ) {
+						case 'version':
+							$section     = 'PHP Version';
+							$cur_version = phpversion();
+							break;
+						case 'extensions':
+							$section = 'PHP Extension';
+							break;
+					}
+				} elseif ( $type === 'mysql' ) {
+					$section     = 'MySQL Version';
+					$cur_version = $this->get_current_mysql_ver();
+				} elseif ( $type === 'wordpress' ) {
+					switch ( $key ) {
+						case 'version':
+							$section = 'WordPress Version';
+							global $wp_version;
+							$cur_version = $wp_version;
+							break;
+						case 'plugins':
+							$section = 'Plugin';
+							break;
+						case 'theme':
+							$section = 'Theme';
+							break;
+					}
+				}
+
+				// Ordinary bool meant this is just a 'version'
+				if ( is_bool( $value ) ) {
+					$message[] = $this->get_notice_status_icon( $value ) .
+					             sprintf(
+						             $string_version,
+						             $section,
+						             $cur_version,
+						             $this->version_compare_operator . $this->required[ $type ][ $key ]
+					             );
+				} elseif ( is_array( $value ) && ! empty( $value ) ) {
+					// We need to know - whether we work with PHP extensions or WordPress plugins/theme
+					// Extensions are currently passed as an ordinary numeric (while plugins - associative) array
+					if ( ! $this->is_array_associative( $this->required[ $type ][ $key ] ) ) { // these are extensions
+						foreach ( $value as $entity => $is_valid ) {
+							$message[] = $this->get_notice_status_icon( $is_valid ) .
+							             sprintf(
+								             $is_valid ? $string_ext_loaded : $string_ext_not_loaded,
+								             $section . ' "' . $entity . '"'
+							             );
+						}
+					} else {
+						foreach ( $value as $entity => $is_valid ) {
+							$entity_name = '';
+							// Plugins and themes has different data sources
+							if ( $key == 'plugins' ) {
+								$entity_data = get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $entity, false );
+								$entity_name = $entity_data['Name'];
+							} elseif ( $key == 'theme' ) {
+								$entity_data = wp_get_theme();
+								$entity_name = $entity_data->get( 'Name' );
+							}
+							$message[] = $this->get_notice_status_icon( $is_valid ) .
+							             sprintf(
+								             $is_valid ? $string_wp_loaded : $string_wp_not_loaded,
+								             $section . ' "' . $entity_name . '"',
+								             $this->version_compare_operator . $this->required[ $type ][ $key ][ $entity ]
+							             );
+						}
+					}
+				}
+			} // endforeach
+
+			return '<li>' . implode( '</li><li>', $message ) . '</li>';
+		}
+
+		/**
+		 * Return a visual icon indicator of success or error
+		 *
+		 * @param bool $status
+		 *
+		 * @return string
+		 */
+		private function get_notice_status_icon( $status ) {
+			return ( $status === true ) ? $this->icon_good : $this->icon_bad;
 		}
 
 		/**
@@ -293,6 +427,17 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 			}
 
 			return false;
+		}
+
+		/**
+		 * Returns a value indicating whether the given array is an associative array.
+		 *
+		 * @param array $array the array being checked
+		 *
+		 * @return boolean whether the array is associative
+		 */
+		private function is_array_associative( $array ) {
+			return array_keys( array_merge( $array ) ) !== range( 0, count( $array ) - 1 );
 		}
 
 		/**
@@ -334,7 +479,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 *******************************/
 
 		/**
-		 * Load requirements.json
+		 * Load wp-requirements.json
 		 *
 		 * @return array
 		 */
@@ -385,6 +530,8 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		}
 
 		/**
+		 * Parse JSON string to make it an array that is usable for us
+		 *
 		 * @param string $json
 		 *
 		 * @return array
