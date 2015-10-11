@@ -66,6 +66,7 @@ function your_plugin_activation() {
 	$requirements = new WP_Requirements( $wpr_test );
 	if ( ! $requirements->valid() ) {
 		$requirements->process_failure();
+		return;
 	}
 
 	// your other code here...
