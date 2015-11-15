@@ -187,11 +187,17 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 
 						foreach ( $data as $plugin => $version ) {
 							if ( $plugin && is_string( $plugin ) ) {
-								// check that it's active
+								$required[ $type ][ $plugin ] = $version;
 
+								// Check that we don't have a typo in plugin slug
+								if ( ! file_exists( trailingslashit( WP_PLUGIN_DIR ) . $plugin ) ) {
+									$result[ $type ][ $plugin ] = false;
+									continue;
+								}
+								
+								// check that it's active
 								$raw_Data                     = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, false, false );
 								$result[ $type ][ $plugin ]   = is_plugin_active( $plugin ) && version_compare( $raw_Data['Version'], $version, $this->version_compare_operator );
-								$required[ $type ][ $plugin ] = $version;
 							}
 						}
 
@@ -367,8 +373,12 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 							$entity_name = '';
 							// Plugins and themes has different data sources
 							if ( $key == 'plugins' ) {
-								$entity_data = get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $entity, false );
-								$entity_name = $entity_data['Name'];
+								if ( file_exists( trailingslashit( WP_PLUGIN_DIR ) . $entity ) ) {
+									$entity_data = get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $entity, false );
+									$entity_name = $entity_data['Name'];
+								} else {
+									$entity_name = $entity;
+								}
 							} elseif ( $key == 'theme' ) {
 								$entity_data = wp_get_theme();
 								$entity_name = $entity_data->get( 'Name' );
