@@ -150,7 +150,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		}
 
 		/**
-		 * Check all MySqll related data, like version (so far)
+		 * Check all MySQL related data, like version (so far)
 		 *
 		 * @param array $mysql
 		 */
@@ -453,13 +453,12 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		/**
 		 * Get the MySQL version number based on data in global WPDB class
 		 *
-		 * @uses WPDB $wpdb
+		 * @global wpdb $wpdb
 		 * @return string MySQL version number, like 5.5
 		 */
 		private function get_current_mysql_ver() {
 			global $wpdb;
 
-			/** @var stdClass $wpdb */
 			return substr( $wpdb->dbh->server_info, 0, strpos( $wpdb->dbh->server_info, '-' ) );
 		}
 
