@@ -33,12 +33,12 @@ $wpr_test = array(
 		'version'    => 5.3,
 		'extensions' => array( 'curl', 'mysql' )
 	),
-	'mysql'     => array( 'version' => 5.5 ),
+	'mysql'     => array( 'version' => 5.7 ),
 	'wordpress' => array(
 		'version' => 3.8,
 		'plugins' => array(
 			'buddypress/bp-loader.php'            => 2.2,
-			'bp-default-data/bp-default-data.php' => 1.0,
+			'bp-default-data/bp-default-data.php' => '1.0',
 		),
 		'theme'   => array(
 			'hueman' => 1.5
@@ -55,25 +55,9 @@ $wpr_test = array(
 /**
  * Now you need to prevent both plugin activation and functioning
  * if the site doesn't meet requirements
+ *
+ * Check all the time in admin area that nothing is broken for your plugin.
  */
-
-// Check on plugin activation
-register_activation_hook( __FILE__, 'your_plugin_activation' );
-
-function your_plugin_activation() {
-	global $wpr_test;
-
-	$requirements = new WP_Requirements( $wpr_test );
-	if ( ! $requirements->valid() ) {
-		$requirements->process_failure();
-		return;
-	}
-
-	// your other code here...
-}
-
-// Check all the time in admin area that nothing is broken for your plugin
-// You can use other hooks instead of 'admin_init'
 function your_plugin_check_requirements() {
 	global $wpr_test;
 
