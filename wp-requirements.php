@@ -19,7 +19,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 
 	class WP_Requirements {
 
-		const VERSION = '1.1';
+		const VERSION = '1.2';
 
 		public $results  = array();
 		public $required = array();
@@ -372,14 +372,14 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 						foreach ( $value as $entity => $is_valid ) {
 							$entity_name = '';
 							// Plugins and themes has different data sources
-							if ( $key == 'plugins' ) {
+							if ( $key === 'plugins' ) {
 								if ( file_exists( trailingslashit( WP_PLUGIN_DIR ) . $entity ) ) {
 									$entity_data = get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $entity, false );
 									$entity_name = $entity_data['Name'];
 								} else {
 									$entity_name = $entity;
 								}
-							} elseif ( $key == 'theme' ) {
+							} elseif ( $key === 'theme' ) {
 								$entity_data = wp_get_theme();
 								$entity_name = $entity_data->get( 'Name' );
 							}
@@ -459,7 +459,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		private function get_current_mysql_ver() {
 			global $wpdb;
 
-			return substr( $wpdb->dbh->server_info, 0, strpos( $wpdb->dbh->server_info, '-' ) );
+			return $wpdb->db_version();
 		}
 
 		/**
