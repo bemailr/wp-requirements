@@ -1,22 +1,22 @@
 {
   "php": {
-    "version": 5.3,
+    "version": "5.3",
     "extensions": [
       "curl",
       "mysql"
     ]
   },
   "mysql": {
-    "version": 5.1
+    "version": "5.1"
   },
   "wordpress": {
-    "version": 3.8,
+    "version": "3.8",
     "plugins": {
-      "buddypress/bp-loader.php": 2.2,
-      "bp-default-data/bp-default-data.php": 1.0
+      "buddypress/bp-loader.php": "2.2",
+      "bp-default-data/bp-default-data.php": "1.0"
     },
     "theme": {
-      "hueman": 1.5
+      "hueman": "1.5"
     }
   },
   "params": {
