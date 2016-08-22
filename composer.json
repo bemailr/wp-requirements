@@ -1,5 +1,5 @@
 {
-  "name": "slaFFik/wp-requirements",
+  "name": "slaffik/wp-requirements",
   "description": "Class WP_Requirements for checking server and site for meeting your code requirements",
   "minimum-stability": "stable",
   "license": "GPL-2.0",
