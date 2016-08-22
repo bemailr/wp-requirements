@@ -12,6 +12,10 @@ Including:
 
 # How to use
 
+First, you need to install the library. You can just `require_once` it (see below in code samples), or use Composer:
+
+```composer require slaffik/wp-requirements```
+
 There are several ways to define your own requirements:
 
 * using ordinary PHP array
@@ -21,7 +25,7 @@ There are several ways to define your own requirements:
 
 ```php
 // Don't forget to include this library into the main file of your plugin
-include( dirname( __FILE__ ) . '/lib/wp-requirements.php' );
+require_once dirname( __FILE__ ) . '/vendor/slaffik/wp-requirements/wp-requirements.php';
 
 // Init your requirements globally in your main plugin file
 // or use any function that will return all that:
@@ -74,7 +78,7 @@ add_action( 'admin_init', 'your_plugin_check_requirements' );
 
 Get the `wp-requirement-sample.json` from this repository, make required changes, rename it to `wp-requirement.json` and put in one of these directories:
 
-1. same place where a file with `WP_Requirements` class is located, example: `/wp-content/plugins/your-plugin/lib/wp-requirements.json`
+1. same place where a file with `WP_Requirements` class is located, example: `/wp-content/plugins/your-plugin/vendor/slaffik/wp-requirements/wp-requirements.json`
 2. plugin basename path, example: `/wp-content/plugins/your-plugin/wp-requirements.json`
 3. WordPress content directory: `/wp-content/wp-requirements.json`
 4. WordPress absolute path (basically, the same place where `wp-load.php` is located): `/wp-requirements.json`
@@ -100,8 +104,3 @@ You can modify some parts of the logic
 * `locale` - default is `wp-requirements`. Gives ability to define a domain locale, that will be used to translate default messages in this class using your own `po`/`mo` files.
 * `version_compare_operator` - default is `>=`. Gives ability to finer define rules to compare versions. Other possible values are those, that are supported by [version_compare()](http://php.net/manual/en/function.version-compare.php)
 * `not_valid_actions` - default is `array( 'deactivate', 'admin_notice' )`. Gives ability to define what should be done on plugin activation if requirements are **not** met.
-
-
----
-
-Enjoy!
