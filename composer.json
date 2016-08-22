@@ -1,0 +1,12 @@
+{
+  "name": "slaFFik/wp-requirements",
+  "description": "Class WP_Requirements for checking server and site for meeting your code requirements",
+  "minimum-stability": "stable",
+  "license": "GPL-2.0",
+  "authors": [
+    {
+      "name": "Slava Abakumov",
+      "email": "slava.abakumov@gmail.com"
+    }
+  ]
+}
