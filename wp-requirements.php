@@ -73,6 +73,13 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		public $not_valid_actions = array( 'deactivate', 'admin_notice' );
 
 		/**
+		 * Whether to show validation success messages or only failures.
+		 *
+		 * @var bool
+		 */
+		protected $show_valid_results = false;
+
+		/**
 		 * Icon to mark the OK results.
 		 *
 		 * @var string
@@ -173,6 +180,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 			$this->requirements_details_url = ! empty( $params['requirements_details_url'] ) ? esc_url( trim( (string) $params['requirements_details_url'] ) ) : $this->requirements_details_url;
 			$this->version_compare_operator = ! empty( $params['version_compare_operator'] ) ? (string) $params['version_compare_operator'] : $this->version_compare_operator;
 			$this->not_valid_actions        = ! empty( $params['not_valid_actions'] ) ? (array) $params['not_valid_actions'] : $this->not_valid_actions;
+			$this->show_valid_results        = isset( $params['show_valid_results'] ) ? (bool) $params['show_valid_results'] : $this->show_valid_results;
 		}
 
 		/**
@@ -410,7 +418,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 				}
 
 				// Ordinary bool meant this is just a 'version'.
-				if ( is_bool( $value ) ) {
+				if ( is_bool( $value ) && ( ! $value || $this->show_valid_results ) ) {
 					$message[] = $this->get_notice_status_icon( $value ) .
 					             sprintf(
 						             $string_version,
@@ -423,6 +431,11 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 					// Extensions are currently passed as an ordinary numeric (while plugins - associative) array
 					if ( ! $this->is_array_associative( $this->required[ $type ][ $key ] ) ) { // These are extensions.
 						foreach ( (array) $value as $entity => $is_valid ) {
+
+							if ( $is_valid && ! $this->show_valid_results ) {
+								continue;
+							}
+
 							$message[] = $this->get_notice_status_icon( $is_valid ) .
 							             sprintf(
 								             $is_valid ? $string_ext_loaded : $string_ext_not_loaded,
@@ -431,6 +444,11 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 						}
 					} else {
 						foreach ( (array) $value as $entity => $is_valid ) {
+
+							if ( $is_valid && ! $this->show_valid_results ) {
+								continue;
+							}
+
 							$entity_name = '';
 							// Plugins and themes has different data sources.
 							if ( 'plugins' === $key ) {
