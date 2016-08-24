@@ -1,9 +1,12 @@
 <?php
 /**
+ * File: wp-requirements.php
+ *
+ * @package WP-Requirements
+ *
  * Class WP_Requirements for checking server and site for meeting your code requirements
  *
- * You can use this class to check, that PHP, MySQL and WordPress (version, plugins, themes) meet requirements
- * to make your code in a plugin work.
+ * You can use this class to check, that PHP, MySQL and WordPress (version, plugins, themes) meet requirements to make your code in a plugin work.
  *
  * You can define those rules as both array or a JSON file (soon). For an example json file see the requirements-sample.json.
  * Copy that file to a new one without "-sample" in the file name part and adjust data to your needs.
@@ -16,46 +19,100 @@
 
 // Do not load the class twice. Although there might be compatibility issues.
 if ( ! class_exists( 'WP_Requirements' ) ) :
-
+	/**
+	 * Class WP_Requirements
+	 */
 	class WP_Requirements {
 
+		/**
+		 * Version of this library.
+		 */
 		const VERSION = '2.0.0';
 
-		public $results  = array();
+		/**
+		 * Array of validation results.
+		 *
+		 * @var array
+		 */
+		public $results = array();
+
+		/**
+		 * Array of requirements.
+		 *
+		 * @var array
+		 */
 		public $required = array();
 
+		/**
+		 * Url to show instead of listing errors.
+		 *
+		 * @var string
+		 */
 		public $requirements_details_url = '';
-		public $locale                   = 'wp-requirements';
-		public $version_compare_operator = '>=';
-		public $not_valid_actions        = array( 'deactivate', 'admin_notice' );
 
-		private $icon_good = '<span class="dashicons dashicons-yes"></span>&nbsp';
-		private $icon_bad  = '<span class="dashicons dashicons-minus"></span>&nbsp';
+		/**
+		 * Text domain.
+		 *
+		 * @todo Refactor this.
+		 * @var string
+		 */
+		public $locale = 'wp-requirements';
+
+		/**
+		 * Default operator for version comparison.
+		 *
+		 * @var string
+		 */
+		public $version_compare_operator = '>=';
+
+		/**
+		 * List of actions to be performed if validation failed.
+		 *
+		 * @var array
+		 */
+		public $not_valid_actions = array( 'deactivate', 'admin_notice' );
+
+		/**
+		 * Icon to mark the OK results.
+		 *
+		 * @var string
+		 */
+		protected $icon_good = '<span class="dashicons dashicons-yes"></span>&nbsp';
+
+		/**
+		 * Icon to mark the failed results.
+		 *
+		 * @var string
+		 */
+		protected $icon_bad = '<span class="dashicons dashicons-minus"></span>&nbsp';
 
 		/**
 		 * Plugin information.
 		 *
-		 * @var array
+		 * @var string[]
 		 */
-		private $plugin = array();
+		protected $plugin = array();
 
 		/**
 		 * WP_Requirements constructor.
 		 *
-		 * @param string $the__file__ Pass `__FILE__` from the loader.
-		 * @param array $requirements
+		 * @param string $the__file__  Pass `__FILE__` from the loader.
+		 * @param array  $requirements The array of requirements.
+		 *                             Optional. If omitted, the wp-requirements.json file will be
+		 *                             searched for the requirements.
 		 */
-		public function __construct( $the__file__, $requirements = array() ) {
+		public function __construct( $the__file__, array $requirements = array() ) {
 
-			// plugin information is always required, so get it once
+			// Plugin information is always required, so get it now.
 			$this->set_plugin( $the__file__ );
 
-			// Requirements can be specified in JSON file
+			// Requirements can be specified in JSON file.
 			if ( empty( $requirements ) ) {
+				/** @var array $requirements */
 				$requirements = $this->load_json();
 			}
 
-			// heavy processing here
+			// Heavy processing here.
 			$this->validate_requirements( $requirements );
 		}
 
@@ -66,23 +123,22 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 */
 		protected function set_plugin( $the__file__ ) {
 			if ( ! function_exists( 'get_plugins' ) ) {
+				/* @noinspection PhpIncludeInspection */
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
-			$this->plugin = array();
 			$this->plugin['fullpath'] = wp_normalize_path( $the__file__ );
 			$this->plugin['basename'] = plugin_basename( $this->plugin['fullpath'] );
 			list( $this->plugin['dirname'], $this->plugin['filename'] ) = explode( '/', $this->plugin['basename'] );
 
-			$plugin = get_plugin_data( $this->plugin['fullpath'] );
-			$this->plugin['name'] = $plugin['Name'];
+			$plugin_data          = get_plugin_data( $this->plugin['fullpath'] );
+			$this->plugin['name'] = $plugin_data['Name'];
 		}
 
 		/**
-		 * All the requirements will be checked and become accesible here:
-		 *     $this->results
+		 * All the requirements will be checked and become accessible here: $this->results.
 		 *
-		 * @param array $requirements
+		 * @param array $requirements Array of requirements.
 		 */
 		protected function validate_requirements( $requirements ) {
 			if ( empty( $requirements ) ) {
@@ -136,10 +192,8 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 						break;
 
 					case 'extensions':
-						$data = is_array( $data ) ? $data : (array) $data;
-
 						// check that all required extensions are loaded
-						foreach ( $data as $extension ) {
+						foreach ( (array) $data as $extension ) {
 							if ( $extension && is_string( $extension ) ) {
 								$result[ $type ][ $extension ] = extension_loaded( $extension );
 								$required[ $type ][]           = $extension;
@@ -185,12 +239,11 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 
 					case 'plugins':
 						if ( ! function_exists( 'is_plugin_active' ) ) {
-							include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+							/* @noinspection PhpIncludeInspection */
+							include_once ABSPATH . 'wp-admin/includes/plugin.php';
 						}
 
-						$data = is_array( $data ) ? $data : (array) $data;
-
-						foreach ( $data as $plugin => $version ) {
+						foreach ( (array) $data as $plugin => $version ) {
 							if ( $plugin && is_string( $plugin ) ) {
 								$required[ $type ][ $plugin ] = $version;
 
@@ -201,15 +254,17 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 								}
 
 								// check that it's active
-								$raw_Data                     = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, false, false );
-								$result[ $type ][ $plugin ]   = is_plugin_active( $plugin ) && version_compare( $raw_Data['Version'], $version, $this->version_compare_operator );
+								$raw_data                   = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, false, false );
+								$result[ $type ][ $plugin ] = is_plugin_active( $plugin ) && version_compare( $raw_data['Version'], $version, $this->version_compare_operator );
 							}
 						}
 
 						break;
 
 					case 'theme':
-						$theme         = is_array( $data ) ? $data : (array) $data;
+						$theme = (array) $data;
+
+						/** @var WP_Theme $current_theme */
 						$current_theme = wp_get_theme();
 
 						// now check the theme - user defined slug can be either template (parent theme) or stylesheet (currently active theme)
@@ -308,11 +363,11 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 * Prepare a string, that will be displayed in a row for PHP and MySQL only
 		 *
 		 * @param string $type What's the type of the data: php or mysql
-		 * @param array $data Contains version and extensions keys with their values
+		 * @param array  $data Contains version and extensions keys with their values
 		 *
 		 * @return string $result
 		 */
-		private function format_php_mysql_notice( $type, $data ) {
+		protected function format_php_mysql_notice( $type, $data ) {
 			$string_version        = __( '%s: current %s, required %s', $this->locale );
 			$string_ext_loaded     = __( '%s is activated', $this->locale );
 			$string_ext_not_loaded = __( '%s is not activated', $this->locale );
@@ -324,7 +379,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 			foreach ( $data as $key => $value ) { // version : 5.5 || extensions : [curl,mysql]
 				$section = $cur_version = '';
 
-				if ( $type === 'php' ) {
+				if ( 'php' === $type ) {
 					switch ( $key ) {
 						case 'version':
 							$section     = 'PHP Version';
@@ -334,10 +389,10 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 							$section = 'PHP Extension';
 							break;
 					}
-				} elseif ( $type === 'mysql' ) {
+				} elseif ( 'mysql' === $type ) {
 					$section     = 'MySQL Version';
 					$cur_version = $this->get_current_mysql_ver();
-				} elseif ( $type === 'wordpress' ) {
+				} elseif ( 'wordpress' === $type ) {
 					switch ( $key ) {
 						case 'version':
 							$section = 'WordPress Version';
@@ -366,7 +421,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 					// We need to know - whether we work with PHP extensions or WordPress plugins/theme
 					// Extensions are currently passed as an ordinary numeric (while plugins - associative) array
 					if ( ! $this->is_array_associative( $this->required[ $type ][ $key ] ) ) { // these are extensions
-						foreach ( $value as $entity => $is_valid ) {
+						foreach ( (array) $value as $entity => $is_valid ) {
 							$message[] = $this->get_notice_status_icon( $is_valid ) .
 							             sprintf(
 								             $is_valid ? $string_ext_loaded : $string_ext_not_loaded,
@@ -374,17 +429,18 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 							             );
 						}
 					} else {
-						foreach ( $value as $entity => $is_valid ) {
+						foreach ( (array) $value as $entity => $is_valid ) {
 							$entity_name = '';
-							// Plugins and themes has different data sources
-							if ( $key === 'plugins' ) {
+							// Plugins and themes has different data sources.
+							if ( 'plugins' === $key ) {
 								if ( file_exists( trailingslashit( WP_PLUGIN_DIR ) . $entity ) ) {
 									$entity_data = get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $entity, false );
 									$entity_name = $entity_data['Name'];
 								} else {
 									$entity_name = $entity;
 								}
-							} elseif ( $key === 'theme' ) {
+							} elseif ( 'theme' === $key ) {
+								/** @var WP_Theme $entity_data */
 								$entity_data = wp_get_theme();
 								$entity_name = $entity_data->get( 'Name' );
 							}
@@ -409,20 +465,20 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 *
 		 * @return string
 		 */
-		private function get_notice_status_icon( $status ) {
-			return ( $status === true ) ? $this->icon_good : $this->icon_bad;
+		protected function get_notice_status_icon( $status ) {
+			return ( true === $status ) ? $this->icon_good : $this->icon_bad;
 		}
 
 		/**
 		 * Does $haystack contain $needle in any of the values?
 		 * Adapted to our needs, works with arrays in arrays
 		 *
-		 * @param mixed $needle What to search
+		 * @param mixed $needle   What to search
 		 * @param array $haystack Where to search
 		 *
 		 * @return bool
 		 */
-		private function in_array_recursive( $needle, $haystack ) {
+		protected function in_array_recursive( $needle, $haystack ) {
 			foreach ( $haystack as $type => $v ) {
 				if ( $needle === $v ) { // useful for recursion only
 					return true;
@@ -451,7 +507,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 *
 		 * @return boolean whether the array is associative
 		 */
-		private function is_array_associative( $array ) {
+		protected function is_array_associative( $array ) {
 			return array_keys( array_merge( $array ) ) !== range( 0, count( $array ) - 1 );
 		}
 
@@ -461,7 +517,8 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 * @global wpdb $wpdb
 		 * @return string MySQL version number, like 5.5
 		 */
-		private function get_current_mysql_ver() {
+		protected function get_current_mysql_ver() {
+			/** @global wpdb $wpdb */
 			global $wpdb;
 
 			return $wpdb->db_version();
@@ -488,10 +545,6 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 			return null;
 		}
 
-		/********************************
-		 ************* JSON *************
-		 *******************************/
-
 		/**
 		 * Load wp-requirements.json
 		 *
@@ -501,7 +554,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 			$json_file = $this->search_json();
 			$json_data = '{}';
 
-			if ( $json_file !== '' ) {
+			if ( '' !== $json_file ) {
 				$json_data = file_get_contents( $json_file );
 			}
 
@@ -551,11 +604,14 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 * @return array
 		 */
 		protected function parse_json( $json ) {
-			if ( is_array( $data = json_decode( $json, true ) ) ) {
-				return $data;
+
+			$data = json_decode( $json, true );
+
+			if ( ! is_array( $data ) ) {
+				$data = array();
 			}
 
-			return array();
+			return $data;
 		}
 	}
 
