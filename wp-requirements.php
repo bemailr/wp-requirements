@@ -19,7 +19,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 
 	class WP_Requirements {
 
-		const VERSION = '1.2';
+		const VERSION = '2.0.0';
 
 		public $results  = array();
 		public $required = array();
@@ -32,16 +32,23 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		private $icon_good = '<span class="dashicons dashicons-yes"></span>&nbsp';
 		private $icon_bad  = '<span class="dashicons dashicons-minus"></span>&nbsp';
 
+		/**
+		 * Plugin information.
+		 *
+		 * @var array
+		 */
 		private $plugin = array();
 
 		/**
 		 * WP_Requirements constructor.
 		 *
+		 * @param string $the__file__ Pass `__FILE__` from the loader.
 		 * @param array $requirements
 		 */
-		public function __construct( $requirements = array() ) {
+		public function __construct( $the__file__, $requirements = array() ) {
+
 			// plugin information is always required, so get it once
-			$this->set_plugin();
+			$this->set_plugin( $the__file__ );
 
 			// Requirements can be specified in JSON file
 			if ( empty( $requirements ) ) {
@@ -54,23 +61,21 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 
 		/**
 		 * Set paths, name etc for a plugin
+		 *
+		 * @param string $the__file__ Pass `__FILE__` from the loader through Constructor.
 		 */
-		protected function set_plugin() {
+		protected function set_plugin( $the__file__ ) {
 			if ( ! function_exists( 'get_plugins' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
-			$plugin_dir  = explode( '/', plugin_basename( __FILE__ ) );
-			$plugin      = get_plugins( '/' . $plugin_dir[0] );
-			$plugin_file = array_keys( $plugin );
+			$this->plugin = array();
+			$this->plugin['fullpath'] = wp_normalize_path( $the__file__ );
+			$this->plugin['basename'] = plugin_basename( $this->plugin['fullpath'] );
+			list( $this->plugin['dirname'], $this->plugin['filename'] ) = explode( '/', $this->plugin['basename'] );
 
-			$this->plugin = array(
-				'dirname'  => $plugin_dir[0],
-				'filename' => $plugin_file[0],
-				'name'     => $plugin[ $plugin_file[0] ]['Name'],
-				'basename' => $plugin_dir[0] . '/' . $plugin_file[0],
-				'fullpath' => wp_normalize_path( WP_PLUGIN_DIR ) . '/' . $plugin_dir[0]
-			);
+			$plugin = get_plugin_data( $this->plugin['fullpath'] );
+			$this->plugin['name'] = $plugin['Name'];
 		}
 
 		/**
@@ -194,7 +199,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 									$result[ $type ][ $plugin ] = false;
 									continue;
 								}
-								
+
 								// check that it's active
 								$raw_Data                     = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, false, false );
 								$result[ $type ][ $plugin ]   = is_plugin_active( $plugin ) && version_compare( $raw_Data['Version'], $version, $this->version_compare_operator );
@@ -512,7 +517,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 			$file = '/wp-requirements.json';
 
 			// 1) Search in this same folder
-			$path = wp_normalize_path( dirname( __FILE__ ) . $file );
+			$path = wp_normalize_path( dirname( $this->plugin['fullpath'] ) . $file );
 			if ( is_readable( $path ) ) {
 				return $path;
 			}
