@@ -108,7 +108,6 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 
 			// Requirements can be specified in JSON file.
 			if ( empty( $requirements ) ) {
-				/** @var array $requirements */
 				$requirements = $this->load_json();
 			}
 
@@ -165,9 +164,9 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		}
 
 		/**
-		 * Redefine all params by those, that were submitted by a user
+		 * Redefine all params by those that were submitted by a user.
 		 *
-		 * @param array $params
+		 * @param array $params The array of parameters.
 		 */
 		protected function set_params( $params ) {
 			$this->locale                   = ! empty( $params['locale'] ) ? wp_strip_all_tags( (string) $params['locale'] ) : $this->locale;
@@ -179,7 +178,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		/**
 		 * Check all PHP related data, like version and extensions
 		 *
-		 * @param array $php
+		 * @param array $php PHP requirements.
 		 */
 		protected function validate_php( $php ) {
 			$result = $required = array();
@@ -192,7 +191,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 						break;
 
 					case 'extensions':
-						// check that all required extensions are loaded
+						// Check that all required PHP extensions are loaded.
 						foreach ( (array) $data as $extension ) {
 							if ( $extension && is_string( $extension ) ) {
 								$result[ $type ][ $extension ] = extension_loaded( $extension );
@@ -211,7 +210,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		/**
 		 * Check all MySQL related data, like version (so far)
 		 *
-		 * @param array $mysql
+		 * @param array $mysql MySQL requirements.
 		 */
 		protected function validate_mysql( $mysql ) {
 			if ( ! empty( $mysql['version'] ) ) {
@@ -223,7 +222,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		/**
 		 * Check all WordPress related data, like version, plugins and theme
 		 *
-		 * @param array $wordpress
+		 * @param array $wordpress WordPress requirements.
 		 */
 		protected function validate_wordpress( $wordpress ) {
 			global $wp_version;
@@ -247,13 +246,14 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 							if ( $plugin && is_string( $plugin ) ) {
 								$required[ $type ][ $plugin ] = $version;
 
-								// Check that we don't have a typo in plugin slug
+								// Check that we don't have a typo in the plugin slug.
 								if ( ! file_exists( trailingslashit( WP_PLUGIN_DIR ) . $plugin ) ) {
 									$result[ $type ][ $plugin ] = false;
 									continue;
 								}
 
-								// check that it's active
+								// Check that the plugin is active and
+								// that its version matches the requirements.
 								$raw_data                   = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, false, false );
 								$result[ $type ][ $plugin ] = is_plugin_active( $plugin ) && version_compare( $raw_data['Version'], $version, $this->version_compare_operator );
 							}
@@ -264,10 +264,10 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 					case 'theme':
 						$theme = (array) $data;
 
-						/** @var WP_Theme $current_theme */
 						$current_theme = wp_get_theme();
 
-						// now check the theme - user defined slug can be either template (parent theme) or stylesheet (currently active theme)
+						// Now check the theme: user defined slug can be either template
+						// (parent theme) or stylesheet (currently active theme).
 						foreach ( $theme as $slug => $version ) {
 							if (
 								( $current_theme->get_template() === $slug ||
@@ -335,22 +335,23 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 			echo '<p>';
 
 			printf(
-				__( '%s can\'t be activated because your site doesn\'t meet all requirements.', $this->locale ),
-				'<strong>' . $this->get_plugin( 'name' ) . '</strong>'
+				esc_html__( '%s can\'t be activated because your site doesn\'t meet all requirements.', $this->locale ),
+				'<strong>' . esc_html( $this->get_plugin( 'name' ) ) . '</strong>'
 			);
 
 			echo '</p>';
 
-			// Display the link to more details, if we have it
+			// Display the link to more details, if we have it.
 			if ( ! empty( $this->requirements_details_url ) ) {
 				printf(
-					'<p>' . __( 'Please read more details <a href="%s">here</a>.', $this->locale ) . '</p>',
-					esc_url( $this->requirements_details_url )
+					'<p>' . esc_html__( 'Please read more details %s here %s.', $this->locale ) . '</p>',
+					'<a href="' . esc_url( $this->requirements_details_url ) . '">',
+					'</a>'
 				);
-			} else { // so we need to display all the failures in a notice
+			} else { // So we need to display all the failures in a notice.
 				echo '<ul>';
 				foreach ( $this->results as $type => $data ) {
-					echo $this->format_php_mysql_notice( $type, $data );
+					echo $this->format_php_mysql_notice( $type, $data ); // WPCS: XSS ok.
 				}
 				echo '</ul>';
 
@@ -362,8 +363,8 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		/**
 		 * Prepare a string, that will be displayed in a row for PHP and MySQL only
 		 *
-		 * @param string $type What's the type of the data: php or mysql
-		 * @param array  $data Contains version and extensions keys with their values
+		 * @param string $type What's the type of the data: php or mysql.
+		 * @param array  $data Contains version and extensions keys with their values.
 		 *
 		 * @return string $result
 		 */
@@ -376,7 +377,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 
 			$message = array();
 
-			foreach ( $data as $key => $value ) { // version : 5.5 || extensions : [curl,mysql]
+			foreach ( $data as $key => $value ) { // Version : 5.5 || extensions : [curl,mysql].
 				$section = $cur_version = '';
 
 				if ( 'php' === $type ) {
@@ -408,7 +409,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 					}
 				}
 
-				// Ordinary bool meant this is just a 'version'
+				// Ordinary bool meant this is just a 'version'.
 				if ( is_bool( $value ) ) {
 					$message[] = $this->get_notice_status_icon( $value ) .
 					             sprintf(
@@ -420,7 +421,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 				} elseif ( is_array( $value ) && ! empty( $value ) ) {
 					// We need to know - whether we work with PHP extensions or WordPress plugins/theme
 					// Extensions are currently passed as an ordinary numeric (while plugins - associative) array
-					if ( ! $this->is_array_associative( $this->required[ $type ][ $key ] ) ) { // these are extensions
+					if ( ! $this->is_array_associative( $this->required[ $type ][ $key ] ) ) { // These are extensions.
 						foreach ( (array) $value as $entity => $is_valid ) {
 							$message[] = $this->get_notice_status_icon( $is_valid ) .
 							             sprintf(
@@ -440,7 +441,6 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 									$entity_name = $entity;
 								}
 							} elseif ( 'theme' === $key ) {
-								/** @var WP_Theme $entity_data */
 								$entity_data = wp_get_theme();
 								$entity_name = $entity_data->get( 'Name' );
 							}
@@ -461,7 +461,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		/**
 		 * Return a visual icon indicator of success or error
 		 *
-		 * @param bool $status
+		 * @param bool $status True of false.
 		 *
 		 * @return string
 		 */
@@ -473,22 +473,22 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 * Does $haystack contain $needle in any of the values?
 		 * Adapted to our needs, works with arrays in arrays
 		 *
-		 * @param mixed $needle   What to search
-		 * @param array $haystack Where to search
+		 * @param mixed $needle   What to search.
+		 * @param array $haystack Where to search.
 		 *
 		 * @return bool
 		 */
 		protected function in_array_recursive( $needle, $haystack ) {
 			foreach ( $haystack as $type => $v ) {
-				if ( $needle === $v ) { // useful for recursion only
+				if ( $needle === $v ) { // Useful for recursion only.
 					return true;
 				} elseif ( is_array( $v ) ) {
-					// basically checks only version value
+					// Basically checks only the version value.
 					if ( in_array( $needle, $v, true ) ) {
 						return true;
 					}
 
-					// now, time for recursion
+					// Now, time for recursion.
 					if ( ! $this->in_array_recursive( $needle, $v ) ) {
 						continue;
 					} else {
@@ -503,9 +503,9 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		/**
 		 * Returns a value indicating whether the given array is an associative array.
 		 *
-		 * @param array $array the array being checked
+		 * @param array $array The array being checked.
 		 *
-		 * @return boolean whether the array is associative
+		 * @return bool Whether the array is associative.
 		 */
 		protected function is_array_associative( $array ) {
 			return array_keys( array_merge( $array ) ) !== range( 0, count( $array ) - 1 );
@@ -518,7 +518,11 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		 * @return string MySQL version number, like 5.5
 		 */
 		protected function get_current_mysql_ver() {
-			/** @global wpdb $wpdb */
+			/**
+			 * WPDB
+			 *
+			 * @global wpdb $wpdb
+			 */
 			global $wpdb;
 
 			return $wpdb->db_version();
@@ -527,17 +531,17 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		/**
 		 * Retrieve current plugin data, like paths, name etc
 		 *
-		 * @param string $data
+		 * @param string $data Which data is requested.
 		 *
 		 * @return mixed
 		 */
 		public function get_plugin( $data = '' ) {
-			// get all the data
+			// Get all the data.
 			if ( empty( $data ) ) {
 				return $this->plugin;
 			}
 
-			// get specific plugin data
+			// Get specific plugin data.
 			if ( ! empty( $this->plugin[ $data ] ) ) {
 				return $this->plugin[ $data ];
 			}
@@ -599,7 +603,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 		/**
 		 * Parse JSON string to make it an array that is usable for us
 		 *
-		 * @param string $json
+		 * @param string $json JSON string.
 		 *
 		 * @return array
 		 */
@@ -616,3 +620,5 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 	}
 
 endif;
+
+/*EOF*/
