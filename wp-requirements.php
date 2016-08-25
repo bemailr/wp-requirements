@@ -343,7 +343,7 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 			echo '<p>';
 
 			printf(
-				esc_html__( '%s can\'t be activated because your site doesn\'t meet all requirements.', $this->locale ),
+				esc_html__( '%s will not function because your site doesn\'t meet some of the requirements:', $this->locale ),
 				'<strong>' . esc_html( $this->get_plugin( 'name' ) ) . '</strong>'
 			);
 
@@ -380,8 +380,8 @@ if ( ! class_exists( 'WP_Requirements' ) ) :
 			$string_version        = __( '%s: current %s, required %s', $this->locale );
 			$string_ext_loaded     = __( '%s is activated', $this->locale );
 			$string_ext_not_loaded = __( '%s is not activated', $this->locale );
-			$string_wp_loaded      = __( '%s of a valid version %s is activated', $this->locale );
-			$string_wp_not_loaded  = __( '%s of a valid version %s is not activated', $this->locale );
+			$string_wp_loaded      = __( '%s is activated and has a required version %s', $this->locale );
+			$string_wp_not_loaded  = __( '%s version %s must be activated', $this->locale );
 
 			$message = array();
 
