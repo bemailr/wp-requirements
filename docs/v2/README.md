@@ -1,15 +1,16 @@
 # WP Requirements
 ## Version 2
 
-Providing WordPress developers with the ability to check server and WordPress conditions for satisfying their plugins requirements.
+A helpful library for checking the prerequisites when activating / running a WordPress plugin.
 
-Including:
-* PHP minimum version
-* MySQL minimum version
-* Enabled PHP extensions
-* WordPress minimum version
-* activated WordPress plugins and their appropriate minimum versions
-* activated WordPress theme and its appropriate minimum version
+## About
+
+`WP Requirements` is a library that helps WordPress developers to check whether the environment meets their plugins' requirements.
+
+The current version of the library can be used to verify:
+* Versions of PHP, MySQL and WordPress;
+* Enabled PHP extensions;
+* Versions of the activated WordPress theme and plugins.
 
 # How to use
 
@@ -61,7 +62,7 @@ $wpr_test = array(
  * Now you need to prevent both plugin activation and functioning
  * if the site doesn't meet requirements
  *
- * Check all the time in admin area that nothing is broken for your plugin.
+ * Check all the time in the admin area that nothing is broken for your plugin.
  */
 function your_plugin_check_requirements() {
 	global $wpr_test;
@@ -101,7 +102,7 @@ if ( ! $requirements->valid() ) {
 
 You can modify some parts of the logic
 
-* `requirements_details_url` - default is ` ` (empty). Gives ability to define an URL that will be displayed instead of the default complete list of successful and falsy checks against requirements. Useful if the list is quite big and/or if you provide such information on a special page in either WordPress admin area or on your own site.
-* `locale` - default is `wp-requirements`. Gives ability to define a domain locale, that will be used to translate default messages in this class using your own `po`/`mo` files.
-* `version_compare_operator` - default is `>=`. Gives ability to finer define rules to compare versions. Other possible values are those, that are supported by [version_compare()](http://php.net/manual/en/function.version-compare.php)
-* `not_valid_actions` - default is `array( 'deactivate', 'admin_notice' )`. Gives ability to define what should be done on plugin activation if requirements are **not** met.
+* `requirements_details_url` - default is ` ` (empty). Gives the ability to define a URL that will be displayed instead of the default complete list of successful and failed checks against requirements. Useful if the list is quite big and/or if you provide such information on a special page in either WordPress admin area or on your own site.
+* `locale` - default is `wp-requirements`. Gives the ability to define a domain locale, that will be used to translate default messages in this class using your own `PO/MO` files.
+* `version_compare_operator` - default is `>=`. Gives the ability to finer define rules to compare versions. Other possible values are those, that are supported by [version_compare()](http://php.net/manual/en/function.version-compare.php)
+* `not_valid_actions` - default is `array( 'deactivate', 'admin_notice' )`. Gives the ability to define what should be done on plugin activation if requirements are **not** met.
