@@ -614,6 +614,26 @@ class WP_Requirements_2 {
 
 		return $data;
 	}
+
+	/**
+	 * Shortcut to construct the object and process the failure actions.
+	 *
+	 * @param string $the__file__  Pass `__FILE__` from the loader.
+	 * @param array  $requirements The array of requirements.
+	 *
+	 * @return bool True if requirements met.
+	 */
+	public static function validate( $the__file__, array $requirements = array() ) {
+		$_wpr = new WP_Requirements_2( $the__file__, $requirements );
+
+		$is_valid = $_wpr->valid();
+
+		if ( ! $is_valid ) {
+			$_wpr->process_failure();
+		}
+
+		return $is_valid;
+	}
 }
 
 /*EOF*/
