@@ -11,6 +11,13 @@
 class WP_Requirements_2 {
 
 	/**
+	 * Name of the configuration file.
+	 *
+	 * @var string
+	 */
+	const CONFIG_FILE_NAME = 'wp-requirements.json';
+
+	/**
 	 * Array of validation results.
 	 *
 	 * @var array
@@ -554,7 +561,7 @@ class WP_Requirements_2 {
 	 * @return array
 	 */
 	protected function load_json() {
-		$json_file = $this->search_json();
+		$json_file = $this->locate_configuration_file();
 		$json_data = '{}';
 
 		if ( '' !== $json_file ) {
@@ -565,38 +572,29 @@ class WP_Requirements_2 {
 	}
 
 	/**
-	 * Search for a JSON file in different places
+	 * Search for a configuration file in various places.
 	 *
-	 * @return string Path to a found json file
+	 * @return string Path to the file found. Blank string if not found.
 	 */
-	protected function search_json() {
-		$file = '/wp-requirements.json';
+	protected function locate_configuration_file() {
 
-		// 1) Search in this same folder
-		$path = wp_normalize_path( dirname( $this->plugin['fullpath'] ) . $file );
-		if ( is_readable( $path ) ) {
-			return $path;
+		$located = '';
+
+		$folders = array(
+			$this->get_plugin( 'fullpath' ),
+			WP_CONTENT_DIR,
+			ABSPATH,
+		);
+
+		foreach ( $folders as $folder ) {
+			$path = $folder . '/' . self::CONFIG_FILE_NAME;
+			if ( is_readable( $path ) ) {
+				$located = $path;
+				break;
+			}
 		}
 
-		// 2) Plugin base path
-		$path = $this->get_plugin( 'fullpath' ) . $file;
-		if ( is_readable( $path ) ) {
-			return $path;
-		}
-
-		// 3) WP_CONTENT_DIR
-		$path = WP_CONTENT_DIR . $file;
-		if ( is_readable( $path ) ) {
-			return $path;
-		}
-
-		// 4) WordPress base bath
-		$path = ABSPATH . $file;
-		if ( is_readable( $path ) ) {
-			return $path;
-		}
-
-		return '';
+		return $located;
 	}
 
 	/**
