@@ -7,102 +7,91 @@ A helpful library for checking the prerequisites when activating / running a Wor
 
 `WP Requirements` is a library that helps WordPress developers to check whether the environment meets their plugins' requirements.
 
-The current version of the library can be used to verify:
-* Versions of PHP, MySQL and WordPress;
+Currently, you can use the library to verify:
+* Versions of PHP, MySQL, and WordPress;
 * Enabled PHP extensions;
 * Versions of the activated WordPress theme and plugins.
 
-# How to use
+## Installation
 
-First, you need to install the library. You can just `require_once` it (see below in code samples), or use Composer:
+The WP Requirements Library can be included in your project by simply downloading to a folder, by adding as a Git submodule, or with the help of Composer.
 
-```composer require slaffik/wp-requirements```
+### Composer
 
-There are several ways to define your own requirements:
+The library is available on [Packagist](https://packagist.org/packages/slaffik/wp-requirements).
 
-* using ordinary PHP array
-* using cool JSON file
+When you run `composer require slaffik/wp-requirements`, Composer normally installs the library into the `/vendor/slaffik/wp-requirements/` folder. We will assume this path in all examples of the documentation.
 
-## Using PHP
+#### Example of composer.json for your plugin
 
-```php
-// Don't forget to include this library into the main file of your plugin
-require_once dirname( __FILE__ ) . '/vendor/slaffik/wp-requirements/wp-requirements.php';
-
-// Init your requirements globally in your main plugin file
-// or use any function that will return all that:
-global $wpr_test;
-
-// Any options can be omitted
-$wpr_test = array(
-	'php'       => array(
-		'version'    => 5.3,
-		'extensions' => array( 'curl', 'mysql' )
-	),
-	'mysql'     => array( 'version' => 5.7 ),
-	'wordpress' => array(
-		'version' => 3.8,
-		'plugins' => array(
-			'buddypress/bp-loader.php'            => 2.2,
-			'bp-default-data/bp-default-data.php' => '1.0',
-		),
-		'theme'   => array(
-			'hueman' => 1.5
-		)
-	),
-	'params'    => array(
-		'requirements_details_url' => '//google.com',
-		'locale'                   => 'bpf',
-		'version_compare_operator' => '>=',
-		'not_valid_actions'        => array( 'deactivate', 'admin_notice' )
-	)
-);
-
-/**
- * Now you need to prevent both plugin activation and functioning
- * if the site doesn't meet requirements
- *
- * Check all the time in the admin area that nothing is broken for your plugin.
- */
-function your_plugin_check_requirements() {
-	global $wpr_test;
-
-	$requirements = new WP_Requirements( $wpr_test );
-	if ( ! $requirements->valid() ) {
-		$requirements->process_failure();
-	}
+```
+{
+  "name": "me/my-plugin",
+  "description": "My Plugin",
+  "type": "wordpress-plugin",
+  "require": {
+    "slaffik/wp-requirements": "^2.0.0"
+  }
 }
-
-add_action( 'admin_init', 'your_plugin_check_requirements' );
 ```
 
-## Using JSON
+## Using the Library
 
-Get the `wp-requirement-sample.json` from this repository, make required changes, rename it to `wp-requirement.json` and put in one of these directories:
+### The basic usage schema
 
-1. same place where a file with `WP_Requirements` class is located, example: `/wp-content/plugins/your-plugin/vendor/slaffik/wp-requirements/wp-requirements.json`
-2. plugin basename path, example: `/wp-content/plugins/your-plugin/wp-requirements.json`
-3. WordPress content directory: `/wp-content/wp-requirements.json`
-4. WordPress absolute path (basically, the same place where `wp-load.php` is located): `/wp-requirements.json`
-
-That's the loading order from top to bottom. Meaning, that first found file will be loaded as requirements-provider, and other places will be just ignored.
-
-And here is how to init with JSON file loader:
+> This is only a schema. The real code should use WordPress hooks and do some additional checking, as shown in [this example](./sample-plugin-loader.php).
 
 ```php
-// Pay attention - no params specified when initialising the class
-$requirements = new WP_Requirements();
-
+require_once dirname( __FILE__ ) . '/vendor/slaffik/wp-requirements/wpr-loader-2.php';
+$requirements = new WP_Requirements_2( __FILE__ );
 if ( ! $requirements->valid() ) {
 	$requirements->process_failure();
 }
 ```
 
-## Params
+### Defining the requirements
 
-You can modify some parts of the logic
+There are two methods to define your plugin's prerequisites:
 
-* `requirements_details_url` - default is ` ` (empty). Gives the ability to define a URL that will be displayed instead of the default complete list of successful and failed checks against requirements. Useful if the list is quite big and/or if you provide such information on a special page in either WordPress admin area or on your own site.
-* `locale` - default is `wp-requirements`. Gives the ability to define a domain locale, that will be used to translate default messages in this class using your own `PO/MO` files.
-* `version_compare_operator` - default is `>=`. Gives the ability to finer define rules to compare versions. Other possible values are those, that are supported by [version_compare()](http://php.net/manual/en/function.version-compare.php)
-* `not_valid_actions` - default is `array( 'deactivate', 'admin_notice' )`. Gives the ability to define what should be done on plugin activation if requirements are **not** met.
+* By passing a PHP array to the class constructor;
+* By creating a `wp-requirements.json` file.
+
+Both methods work the same way, so use the one you like.
+
+#### PHP array
+
+The second parameter of the constructor is an array of requirements:
+
+    $requirements = new WP_Requirements_2( __FILE__, array(...) );
+
+The [plugin loader example](./sample-plugin-loader.php) shows a sample of such array passed to the class constructor.
+
+#### JSON configuration file
+
+If the array of prerequisites was not passed to the constructor, the WP Requirements Library looks for a file named `wp-requirements.json` in several locations by the following order:
+
+1. The plugin folder, eg. `/wp-content/plugins/your-plugin/wp-requirements.json`;
+1. The WordPress content directory, eg. `/wp-content/wp-requirements.json`;
+1. The WordPress absolute path (where the `wp-load.php` file is located).
+
+The first file found will be loaded and used as the configuration.
+
+The configuration file example can be found [here](./sample-wp-requirements.json). Copy it to your plugin's folder and modify as necessary.
+
+
+## The configuration parameters
+
+| Name | Default Value | Description |
+| --- | --- | --- |
+| `version_compare_operator`  | `>=` | Change the default comparison operator to any value supported by the [version_compare()](http://php.net/manual/en/function.version-compare.php) function. |
+| `not_valid_actions` | `array( 'deactivate', 'admin_notice' )` | Define the actions to be performed if the requirements are **not** met. Depending on your code, you may want to deactivate the plugin, or keep it active doing something limited. |
+| `show_valid_results` | `false` | In the admin notice, show all the results, whether requirement is met or not |
+| `requirements_details_url`  | (empty) | The URL that will be displayed as a link instead of listing the unmet prerequisites. Useful if the list can be long and/or if you want to provide the detailed information on a separate page. |
+
+## Author
+
+* [slaFFik](https://github.com/slaffik)
+
+## License
+
+* [GPL-2.0](https://github.com/slaFFik/wp-requirements/blob/master/LICENSE)

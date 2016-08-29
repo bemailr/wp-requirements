@@ -13,4 +13,4 @@ Providing WordPress developers with the ability to check server and WordPress co
 
 ## License
 
-* [GPL-2.0](./LICENSE)
+* [GPL-2.0](https://github.com/slaFFik/wp-requirements/blob/master/LICENSE)
