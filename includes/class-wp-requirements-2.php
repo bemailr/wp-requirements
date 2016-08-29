@@ -1,20 +1,8 @@
 <?php
 /**
- * File: wp-requirements.php
+ * File: wp-requirements-2.php
  *
  * @package WP-Requirements
- *
- * Class WP_Requirements for checking server and site for meeting your code requirements
- *
- * You can use this class to check, that PHP, MySQL and WordPress (version, plugins, themes) meet requirements to make your code in a plugin work.
- *
- * You can define those rules as both array or a JSON file (soon). For an example json file see the requirements-sample.json.
- * Copy that file to a new one without "-sample" in the file name part and adjust data to your needs.
- * You can place this file in such place (that this class with search in):
- * 1. The same folder as this file.
- * 2. Root plugin directory (usually, '/wp-content/plugins/your-plugin/wp-requirements.json').
- * 3. WP_CONTENT_DIR
- * 4. Root of WordPress install.
  */
 
 /**
