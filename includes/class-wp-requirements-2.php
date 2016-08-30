@@ -121,7 +121,7 @@ class WP_Requirements_2 {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		$this->plugin['fullpath'] = wp_normalize_path( $the__file__ );
+		$this->plugin['fullpath'] = $the__file__;
 		$this->plugin['basename'] = plugin_basename( $this->plugin['fullpath'] );
 		list( $this->plugin['dirname'], $this->plugin['filename'] ) = explode( '/', $this->plugin['basename'] );
 
@@ -581,13 +581,13 @@ class WP_Requirements_2 {
 		$located = '';
 
 		$folders = array(
-			$this->get_plugin( 'fullpath' ),
+			dirname( $this->get_plugin( 'fullpath' ) ),
 			WP_CONTENT_DIR,
 			ABSPATH,
 		);
 
 		foreach ( $folders as $folder ) {
-			$path = $folder . '/' . self::CONFIG_FILE_NAME;
+			$path = trailingslashit( $folder ) . self::CONFIG_FILE_NAME;
 			if ( is_readable( $path ) ) {
 				$located = $path;
 				break;
