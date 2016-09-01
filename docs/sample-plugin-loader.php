@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // WP Requirements library should be used in admin area only.
 if ( ! defined( 'DOING_AJAX' ) && is_admin() ) {
 	// The `wpr-loader` script is responsible for loading the latest version of the library.
-	require_once dirname( __FILE__ ) . '/vendor/slaffik/wp-requirements/wpr-loader-2.php';
+	require_once dirname( __FILE__ ) . '/vendor/bemailr/wp-requirements/wpr-loader.php';
 }
 
 /**
@@ -25,7 +25,7 @@ if ( ! defined( 'DOING_AJAX' ) && is_admin() ) {
  */
 function wp_requirements_example_plugin_loader() {
 
-	if ( class_exists( 'WP_Requirements_2' ) ) :
+	if ( class_exists( 'WP_Requirements' ) ) :
 
 		$my_requirements = array(
 			'php'       => array(
@@ -50,7 +50,7 @@ function wp_requirements_example_plugin_loader() {
 		);
 
 		// If the second parameter is omitted, will look for a `wp-requirements.json` file.
-		$requirements = new WP_Requirements_2( __FILE__, $my_requirements );
+		$requirements = new WP_Requirements( __FILE__, $my_requirements );
 
 		if ( ! $requirements->valid() ) {
 			$requirements->process_failure();

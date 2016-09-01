@@ -1,5 +1,4 @@
 # WP Requirements
-## Version 2
 
 A helpful library for checking the prerequisites when activating / running a WordPress plugin.
 
@@ -8,6 +7,7 @@ A helpful library for checking the prerequisites when activating / running a Wor
 `WP Requirements` is a library that helps WordPress developers to check whether the environment meets their plugins' requirements.
 
 Currently, you can use the library to verify:
+
 * Versions of PHP, MySQL, and WordPress;
 * Enabled PHP extensions;
 * Versions of the activated WordPress theme and plugins.
@@ -42,10 +42,23 @@ When you run `composer require bemailr/wp-requirements`, Composer normally insta
 > This is only a schema. The real code should use WordPress hooks and do some additional checking, as shown in [this example](./sample-plugin-loader.php).
 
 ```php
-require_once dirname( __FILE__ ) . '/vendor/bemailr/wp-requirements/wpr-loader-2.php';
-$requirements = new WP_Requirements_2( __FILE__ );
+require_once dirname( __FILE__ ) . '/vendor/bemailr/wp-requirements/wpr-loader.php';
+if ( ! WP_Requirements::validate( __FILE__ ) ) {
+    return;
+}
+```
+
+A slightly more advanced example:
+
+```php
+require_once dirname( __FILE__ ) . '/vendor/bemailr/wp-requirements/wpr-loader.php';
+$requirements = new WP_Requirements( __FILE__ );
 if ( ! $requirements->valid() ) {
-	$requirements->process_failure();
+    // Here you can do some additional actions.
+    // ...
+
+    // Default action.
+    $requirements->process_failure();
 }
 ```
 
@@ -62,7 +75,9 @@ Both methods work the same way, so use the one you like.
 
 The second parameter of the constructor is an array of requirements:
 
-    $requirements = new WP_Requirements_2( __FILE__, array(...) );
+```php
+    $requirements = new WP_Requirements( __FILE__, array(...) );
+```
 
 The [plugin loader example](./sample-plugin-loader.php) shows a sample of such array passed to the class constructor.
 
@@ -88,10 +103,3 @@ The configuration file example can be found [here](./sample-wp-requirements.json
 | `show_valid_results` | `false` | In the admin notice, show all the results, whether requirement is met or not |
 | `requirements_details_url`  | (empty) | The URL that will be displayed as a link instead of listing the unmet prerequisites. Useful if the list can be long and/or if you want to provide the detailed information on a separate page. |
 
-## Author
-
-* [bemailr](https://github.com/bemailr)
-
-## License
-
-* [GPL-2.0](https://github.com/bemailr/wp-requirements/blob/master/LICENSE)

@@ -2,15 +2,12 @@
 
 Providing WordPress developers with the ability to check server and WordPress conditions for satisfying their plugins' requirements.
 
-## Instructions
+* [Instructions and Examples](./docs/)
 
-* [Version 2](./docs/v2/)
-* [Version 1](./docs/v1/)
-
-## Author
+## Original idea and implementation
 
 * [slaFFik](https://github.com/slaffik)
 
 ## License
 
-* [GPL-2.0](https://github.com/slaFFik/wp-requirements/blob/master/LICENSE)
+* [GPL](https://github.com/slaFFik/wp-requirements/blob/master/LICENSE)

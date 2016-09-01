@@ -1,14 +1,14 @@
 <?php
 /**
- * File: wp-requirements-2.php
+ * File: wp-requirements.php
  *
  * @package WP-Requirements
  */
 
 /**
- * Class WP_Requirements_2
+ * Class WP_Requirements
  */
-class WP_Requirements_2 {
+class WP_Requirements {
 
 	/**
 	 * Name of the configuration file.
@@ -624,7 +624,7 @@ class WP_Requirements_2 {
 	 * @return bool True if requirements met.
 	 */
 	public static function validate( $the__file__, array $requirements = array() ) {
-		$_wpr = new WP_Requirements_2( $the__file__, $requirements );
+		$_wpr = new WP_Requirements( $the__file__, $requirements );
 
 		$is_valid = $_wpr->valid();
 
