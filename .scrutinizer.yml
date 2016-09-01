@@ -34,7 +34,7 @@ checks:
         no_short_method_names:
             minimum: '3'
         no_goto: true
-        no_new_line_at_end_of_file: true
+        no_new_line_at_end_of_file: false
         more_specific_types_in_doc_comments: true
         fix_line_ending: true
         encourage_single_quotes: true
