@@ -572,7 +572,7 @@ class WP_Requirements {
 	}
 
 	/**
-	 * Search for a configuration file in various places.
+	 * Search for a configuration file.
 	 *
 	 * @return string Path to the file found. Blank string if not found.
 	 */
@@ -580,11 +580,17 @@ class WP_Requirements {
 
 		$located = '';
 
-		$folders = array(
-			dirname( $this->get_plugin( 'fullpath' ) ),
-			WP_CONTENT_DIR,
-			ABSPATH,
-		);
+		// By default, search only in the plugin folder.
+		$folders = array( dirname( $this->get_plugin( 'fullpath' ) ) );
+
+		/**
+		 * Filter to modify the array of configuration folders.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param string[] $folders The array of folders.
+		 */
+		$folders = (array) apply_filters( 'wp_requirements_configuration_folders', $folders );
 
 		foreach ( $folders as $folder ) {
 			$path = trailingslashit( $folder ) . self::CONFIG_FILE_NAME;

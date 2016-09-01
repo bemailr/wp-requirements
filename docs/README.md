@@ -83,16 +83,11 @@ The [plugin loader example](./sample-plugin-loader.php) shows a sample of such a
 
 #### JSON configuration file
 
-If the array of prerequisites was not passed to the constructor, the WP Requirements Library looks for a file named `wp-requirements.json` in several locations by the following order:
+If the array of prerequisites was not passed to the constructor, the WP Requirements Library looks for a file named `wp-requirements.json` in the plugin folder, eg. `/wp-content/plugins/your-plugin/wp-requirements.json`;
 
-1. The plugin folder, eg. `/wp-content/plugins/your-plugin/wp-requirements.json`;
-1. The WordPress content directory, eg. `/wp-content/wp-requirements.json`;
-1. The WordPress absolute path (where the `wp-load.php` file is located).
-
-The first file found will be loaded and used as the configuration.
+> You can change this location with the `wp_requirements_configuration_folders` filter.
 
 The configuration file example can be found [here](./sample-wp-requirements.json). Copy it to your plugin's folder and modify as necessary.
-
 
 ## The configuration parameters
 
