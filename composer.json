@@ -1,6 +1,7 @@
 {
   "name": "bemailr/wp-requirements",
-  "description": "Class WP_Requirements for checking server and site for meeting your code requirements",
+  "description": "A helpful library for checking the prerequisites when activating / running a WordPress plugin.",
   "minimum-stability": "stable",
-  "license": "GPL-2.0"
+  "license": "GPL-3.0",
+  "keywords": ["wordpress"]
 }
