@@ -18,9 +18,9 @@ The WP Requirements Library can be included in your project by simply downloadin
 
 ### Composer
 
-The library is available on [Packagist](https://packagist.org/packages/slaffik/wp-requirements).
+The library is available on [Packagist](https://packagist.org/packages/bemailr/wp-requirements).
 
-When you run `composer require slaffik/wp-requirements`, Composer normally installs the library into the `/vendor/slaffik/wp-requirements/` folder. We will assume this path in all examples of the documentation.
+When you run `composer require bemailr/wp-requirements`, Composer normally installs the library into the `/vendor/bemailr/wp-requirements/` folder. We will assume this path in all examples of the documentation.
 
 #### Example of composer.json for your plugin
 
@@ -30,7 +30,7 @@ When you run `composer require slaffik/wp-requirements`, Composer normally insta
   "description": "My Plugin",
   "type": "wordpress-plugin",
   "require": {
-    "slaffik/wp-requirements": "^2.0.0"
+    "bemailr/wp-requirements": "^2.0.0"
   }
 }
 ```
@@ -42,7 +42,7 @@ When you run `composer require slaffik/wp-requirements`, Composer normally insta
 > This is only a schema. The real code should use WordPress hooks and do some additional checking, as shown in [this example](./sample-plugin-loader.php).
 
 ```php
-require_once dirname( __FILE__ ) . '/vendor/slaffik/wp-requirements/wpr-loader-2.php';
+require_once dirname( __FILE__ ) . '/vendor/bemailr/wp-requirements/wpr-loader-2.php';
 $requirements = new WP_Requirements_2( __FILE__ );
 if ( ! $requirements->valid() ) {
 	$requirements->process_failure();
@@ -90,8 +90,8 @@ The configuration file example can be found [here](./sample-wp-requirements.json
 
 ## Author
 
-* [slaFFik](https://github.com/slaffik)
+* [bemailr](https://github.com/bemailr)
 
 ## License
 
-* [GPL-2.0](https://github.com/slaFFik/wp-requirements/blob/master/LICENSE)
+* [GPL-2.0](https://github.com/bemailr/wp-requirements/blob/master/LICENSE)
