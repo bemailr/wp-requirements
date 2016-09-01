@@ -76,7 +76,7 @@ Both methods work the same way, so use the one you like.
 The second parameter of the constructor is an array of requirements:
 
 ```php
-    $requirements = new WP_Requirements( __FILE__, array(...) );
+$requirements = new WP_Requirements( __FILE__, array(...) );
 ```
 
 The [plugin loader example](./sample-plugin-loader.php) shows a sample of such array passed to the class constructor.
@@ -100,6 +100,6 @@ The configuration file example can be found [here](./sample-wp-requirements.json
 | --- | --- | --- |
 | `version_compare_operator`  | `>=` | Change the default comparison operator to any value supported by the [version_compare()](http://php.net/manual/en/function.version-compare.php) function. |
 | `not_valid_actions` | `array( 'deactivate', 'admin_notice' )` | Define the actions to be performed if the requirements are **not** met. Depending on your code, you may want to deactivate the plugin, or keep it active doing something limited. |
-| `show_valid_results` | `false` | In the admin notice, show all the results, whether requirement is met or not |
+| `show_valid_results` | `false` | In the admin notice, show all the results, whether requirements are met or not. |
 | `requirements_details_url`  | (empty) | The URL that will be displayed as a link instead of listing the unmet prerequisites. Useful if the list can be long and/or if you want to provide the detailed information on a separate page. |
 
