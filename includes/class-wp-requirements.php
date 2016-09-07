@@ -241,9 +241,9 @@ class WP_Requirements {
 						include_once ABSPATH . 'wp-admin/includes/plugin.php';
 					}
 
-					foreach ( (array) $data as $plugin => $version ) {
+					foreach ( (array) $data as $plugin => $required_version ) {
 						if ( $plugin && is_string( $plugin ) ) {
-							$required[ $type ][ $plugin ] = $version;
+							$required[ $type ][ $plugin ] = $required_version;
 
 							// Check that we don't have a typo in the plugin slug.
 							if ( ! file_exists( trailingslashit( WP_PLUGIN_DIR ) . $plugin ) ) {
@@ -251,10 +251,43 @@ class WP_Requirements {
 								continue;
 							}
 
-							// Check that the plugin is active and
-							// that its version matches the requirements.
-							$raw_data                   = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin, false, false );
-							$result[ $type ][ $plugin ] = is_plugin_active( $plugin ) && version_compare( $raw_data['Version'], $version, $this->version_compare_operator );
+							$is_plugin_active = is_plugin_active( $plugin );
+
+							if ( is_bool( $required_version ) ) {
+
+								/**
+								 * When the required version is specified
+								 * as a Boolean (`true` or `false`),
+								 * then we do not need to check the version number,
+								 * just active or not.
+								 */
+								$result[ $type ][ $plugin ] =
+									( $is_plugin_active === $required_version );
+
+							} else {
+
+								/**
+								 * Check that the plugin is active and
+								 * that its version matches the requirements.
+								 */
+
+								$raw_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin,
+									false, false
+								);
+
+								// If the plugin does not have a version (?!) then
+								// we consider the version is OK.
+								$is_plugin_version_ok = (
+									! isset( $raw_data['Version'] ) ||
+									version_compare(
+										$raw_data['Version'],
+										$required_version,
+										$this->version_compare_operator
+									)
+								);
+
+								$result[ $type ][ $plugin ] = $is_plugin_active && $is_plugin_version_ok;
+							}
 						}
 					}
 
@@ -267,18 +300,18 @@ class WP_Requirements {
 
 					// Now check the theme: user defined slug can be either template
 					// (parent theme) or stylesheet (currently active theme).
-					foreach ( $theme as $slug => $version ) {
+					foreach ( $theme as $slug => $required_version ) {
 						if (
 							( $current_theme->get_template() === $slug ||
 							  $current_theme->get_stylesheet() === $slug ) &&
-							version_compare( $current_theme->get( 'Version' ), $version, $this->version_compare_operator )
+							version_compare( $current_theme->get( 'Version' ), $required_version, $this->version_compare_operator )
 						) {
 							$result[ $type ][ $slug ] = true;
 						} else {
 							$result[ $type ][ $slug ] = false;
 						}
 
-						$required[ $type ][ $slug ] = $version;
+						$required[ $type ][ $slug ] = $required_version;
 					}
 
 					break;
@@ -374,6 +407,11 @@ class WP_Requirements {
 		$string_wp_loaded      = __( '%s is activated and has a required version %s', $this->locale );
 		$string_wp_not_loaded  = __( '%s version %s must be activated', $this->locale );
 
+		$string_must_be_activated = array(
+			true  => esc_html__( '%s must be activated', $this->locale ),
+			false => esc_html__( '%s must NOT be activated', $this->locale ),
+		);
+
 		$message = array();
 
 		foreach ( $data as $key => $value ) { // Version : 5.5 || extensions : [curl,mysql].
@@ -453,12 +491,22 @@ class WP_Requirements {
 							$entity_data = wp_get_theme();
 							$entity_name = $entity_data->get( 'Name' );
 						}
-						$message[] = $this->get_notice_status_icon( $is_valid ) .
-						             sprintf(
-							             $is_valid ? $string_wp_loaded : $string_wp_not_loaded,
-							             $section . ' "' . $entity_name . '"',
-							             $this->version_compare_operator . $this->required[ $type ][ $key ][ $entity ]
-						             );
+
+						if ( is_bool( $this->required[ $type ][ $key ][ $entity ] ) ) {
+							$message[] = $this->get_notice_status_icon( $is_valid ) .
+							             sprintf(
+								             $string_must_be_activated[ $this->required[ $type ][ $key ][ $entity ] ],
+								             $section . ' "' . $entity_name . '"'
+							             );
+						} else {
+
+							$message[] = $this->get_notice_status_icon( $is_valid ) .
+							             sprintf(
+								             $is_valid ? $string_wp_loaded : $string_wp_not_loaded,
+								             $section . ' "' . $entity_name . '"',
+								             $this->version_compare_operator . $this->required[ $type ][ $key ][ $entity ]
+							             );
+						}
 					}
 				}
 			}
