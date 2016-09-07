@@ -5,6 +5,9 @@
  * @package WP-Requirements
  */
 
+// To avoid the "Other declaration of class exists" warnings.
+/* @noinspection PhpUndefinedClassInspection */
+
 /**
  * Class WP_Requirements
  */
