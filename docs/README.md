@@ -10,7 +10,8 @@ Currently, you can use the library to verify:
 
 * Versions of PHP, MySQL, and WordPress;
 * Enabled PHP extensions;
-* Versions of the activated WordPress theme and plugins.
+* Version of the activated WordPress theme;
+* Whether the required plugins are active or not, and optionally - their versions.
 
 ## Installation
 
@@ -89,7 +90,35 @@ If the array of prerequisites was not passed to the constructor, the WP Requirem
 
 The configuration file example can be found [here](./sample-wp-requirements.json). Copy it to your plugin's folder and modify as necessary.
 
-## The configuration parameters
+### Verifying required plugins
+
+The configuration snippets below tell WP Requirements that:
+
+* WooCommerce plugin must be active and its version must be 2.6 or later;
+* WPGlobus plugin must be active (any version);
+* Polylang plugin must NOT be active.
+
+#### PHP
+
+```php
+'plugins' => array(
+  'woocommerce/woocommerce.php' => '2.6',
+  'wpglobus/wpglobus.php'       => true,
+  'polylang/polylang.php'       => false,
+),
+```
+
+#### JSON
+
+```
+"plugins": {
+  "woocommerce/woocommerce.php": "2.6",
+  "wpglobus/wpglobus.php": true,
+  "polylang/polylang.php": false
+}
+```
+
+## The global configuration parameters
 
 | Name | Default Value | Description |
 | --- | --- | --- |
@@ -97,4 +126,3 @@ The configuration file example can be found [here](./sample-wp-requirements.json
 | `not_valid_actions` | `array( 'deactivate', 'admin_notice' )` | Define the actions to be performed if the requirements are **not** met. Depending on your code, you may want to deactivate the plugin, or keep it active doing something limited. |
 | `show_valid_results` | `false` | In the admin notice, show all the results, whether requirements are met or not. |
 | `requirements_details_url`  | (empty) | The URL that will be displayed as a link instead of listing the unmet prerequisites. Useful if the list can be long and/or if you want to provide the detailed information on a separate page. |
-

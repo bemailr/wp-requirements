@@ -37,7 +37,7 @@ function wp_requirements_example_plugin_loader() {
 				'version' => '4.6',
 				'plugins' => array(
 					'wpglobus/wpglobus.php'           => '1.6.1',
-					'wpglobus-plus/wpglobus-plus.php' => '1.1.20',
+					'wpglobus-plus/wpglobus-plus.php' => true,
 				),
 				'theme'   => array( 'my-theme' => '1.5' ),
 			),
