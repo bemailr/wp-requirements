@@ -383,7 +383,8 @@ class WP_Requirements {
 		} else { // So we need to display all the failures in a notice.
 			echo '<ul>';
 			foreach ( $this->results as $type => $data ) {
-				echo $this->format_php_mysql_notice( $type, $data ); // WPCS: XSS ok.
+				$notices = $this->php_mysql_notices( $type, $data );
+				echo '<li>' . implode( '</li><li>', $notices ) . '</li>'; // WPCS: XSS ok.
 			}
 			echo '</ul>';
 
@@ -398,21 +399,21 @@ class WP_Requirements {
 	 * @param string $type What's the type of the data: php or mysql.
 	 * @param array  $data Contains version and extensions keys with their values.
 	 *
-	 * @return string $result
+	 * @return string[]
 	 */
-	protected function format_php_mysql_notice( $type, $data ) {
-		$string_version        = __( '%s: current %s, required %s', $this->locale );
-		$string_ext_loaded     = __( '%s is activated', $this->locale );
-		$string_ext_not_loaded = __( '%s is not activated', $this->locale );
-		$string_wp_loaded      = __( '%s is activated and has a required version %s', $this->locale );
-		$string_wp_not_loaded  = __( '%s version %s must be activated', $this->locale );
+	protected function php_mysql_notices( $type, $data ) {
+		$string_version        = esc_html__( '%s: current %s, required %s', $this->locale );
+		$string_ext_loaded     = esc_html__( '%s is activated', $this->locale );
+		$string_ext_not_loaded = esc_html__( '%s is not activated', $this->locale );
+		$string_wp_loaded      = esc_html__( '%s is activated and has a required version %s', $this->locale );
+		$string_wp_not_loaded  = esc_html__( '%s version %s must be activated', $this->locale );
 
 		$string_must_be_activated = array(
 			true  => esc_html__( '%s must be activated', $this->locale ),
 			false => esc_html__( '%s must NOT be activated', $this->locale ),
 		);
 
-		$message = array();
+		$notices = array();
 
 		foreach ( $data as $key => $value ) { // Version : 5.5 || extensions : [curl,mysql].
 			$section = $cur_version = '';
@@ -448,7 +449,7 @@ class WP_Requirements {
 
 			// Ordinary bool meant this is just a 'version'.
 			if ( is_bool( $value ) && ( ! $value || $this->show_valid_results ) ) {
-				$message[] = $this->get_notice_status_icon( $value ) .
+				$notices[] = $this->get_notice_status_icon( $value ) .
 				             sprintf(
 					             $string_version,
 					             $section,
@@ -465,7 +466,7 @@ class WP_Requirements {
 							continue;
 						}
 
-						$message[] = $this->get_notice_status_icon( $is_valid ) .
+						$notices[] = $this->get_notice_status_icon( $is_valid ) .
 						             sprintf(
 							             $is_valid ? $string_ext_loaded : $string_ext_not_loaded,
 							             $section . ' "' . $entity . '"'
@@ -493,14 +494,14 @@ class WP_Requirements {
 						}
 
 						if ( is_bool( $this->required[ $type ][ $key ][ $entity ] ) ) {
-							$message[] = $this->get_notice_status_icon( $is_valid ) .
+							$notices[] = $this->get_notice_status_icon( $is_valid ) .
 							             sprintf(
 								             $string_must_be_activated[ $this->required[ $type ][ $key ][ $entity ] ],
 								             $section . ' "' . $entity_name . '"'
 							             );
 						} else {
 
-							$message[] = $this->get_notice_status_icon( $is_valid ) .
+							$notices[] = $this->get_notice_status_icon( $is_valid ) .
 							             sprintf(
 								             $is_valid ? $string_wp_loaded : $string_wp_not_loaded,
 								             $section . ' "' . $entity_name . '"',
@@ -512,7 +513,7 @@ class WP_Requirements {
 			}
 		} // endforeach
 
-		return '<li>' . implode( '</li><li>', $message ) . '</li>';
+		return $notices;
 	}
 
 	/**
