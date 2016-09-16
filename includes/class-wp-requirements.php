@@ -42,14 +42,6 @@ class WP_Requirements {
 	public $requirements_details_url = '';
 
 	/**
-	 * Text domain.
-	 *
-	 * @todo Refactor this.
-	 * @var string
-	 */
-	public $locale = 'wp-requirements';
-
-	/**
 	 * Default operator for version comparison.
 	 *
 	 * @var string
@@ -167,7 +159,6 @@ class WP_Requirements {
 	 * @param array $params The array of parameters.
 	 */
 	protected function set_params( $params ) {
-		$this->locale                   = ! empty( $params['locale'] ) ? wp_strip_all_tags( (string) $params['locale'] ) : $this->locale;
 		$this->requirements_details_url = ! empty( $params['requirements_details_url'] ) ? esc_url( trim( (string) $params['requirements_details_url'] ) ) : $this->requirements_details_url;
 		$this->version_compare_operator = ! empty( $params['version_compare_operator'] ) ? (string) $params['version_compare_operator'] : $this->version_compare_operator;
 		$this->not_valid_actions        = ! empty( $params['not_valid_actions'] ) ? (array) $params['not_valid_actions'] : $this->not_valid_actions;
@@ -367,7 +358,7 @@ class WP_Requirements {
 		echo '<p>';
 
 		printf(
-			esc_html__( '%s will not function because your site doesn\'t meet some of the requirements:', $this->locale ),
+			esc_html__( '%s will not function because your site doesn\'t meet some of the requirements:', 'wp-requirements' ),
 			'<strong>' . esc_html( $this->get_plugin( 'name' ) ) . '</strong>'
 		);
 
@@ -376,7 +367,7 @@ class WP_Requirements {
 		// Display the link to more details, if we have it.
 		if ( $this->requirements_details_url ) {
 			printf(
-				'<p>' . esc_html__( 'Please read more details %s here %s.', $this->locale ) . '</p>',
+				'<p>' . esc_html__( 'Please read more details %s here %s.', 'wp-requirements' ) . '</p>',
 				'<a href="' . esc_url( $this->requirements_details_url ) . '">',
 				'</a>'
 			);
@@ -402,15 +393,15 @@ class WP_Requirements {
 	 * @return string[]
 	 */
 	protected function php_mysql_notices( $type, $data ) {
-		$string_version        = esc_html__( '%s: current %s, required %s', $this->locale );
-		$string_ext_loaded     = esc_html__( '%s is activated', $this->locale );
-		$string_ext_not_loaded = esc_html__( '%s is not activated', $this->locale );
-		$string_wp_loaded      = esc_html__( '%s is activated and has a required version %s', $this->locale );
-		$string_wp_not_loaded  = esc_html__( '%s version %s must be activated', $this->locale );
+		$string_version        = esc_html__( '%s: current %s, required %s', 'wp-requirements' );
+		$string_ext_loaded     = esc_html__( '%s is activated', 'wp-requirements' );
+		$string_ext_not_loaded = esc_html__( '%s is not activated', 'wp-requirements' );
+		$string_wp_loaded      = esc_html__( '%s is activated and has a required version %s', 'wp-requirements' );
+		$string_wp_not_loaded  = esc_html__( '%s version %s must be activated', 'wp-requirements' );
 
 		$string_must_be_activated = array(
-			true  => esc_html__( '%s must be activated', $this->locale ),
-			false => esc_html__( '%s must NOT be activated', $this->locale ),
+			true  => esc_html__( '%s must be activated', 'wp-requirements' ),
+			false => esc_html__( '%s must NOT be activated', 'wp-requirements' ),
 		);
 
 		$notices = array();
