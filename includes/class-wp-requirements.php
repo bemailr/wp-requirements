@@ -105,7 +105,7 @@ class WP_Requirements {
 		$this->set_plugin( $the__file__ );
 
 		// Requirements can be specified in JSON file.
-		if ( empty( $requirements ) ) {
+		if ( ! count( $requirements ) ) {
 			$requirements = $this->load_json();
 		}
 
@@ -138,7 +138,7 @@ class WP_Requirements {
 	 * @param array $requirements Array of requirements.
 	 */
 	protected function validate_requirements( $requirements ) {
-		if ( empty( $requirements ) ) {
+		if ( ! count( $requirements ) ) {
 			return;
 		}
 
@@ -337,7 +337,7 @@ class WP_Requirements {
 	 * Get the list of registered actions and do everything defined by them
 	 */
 	public function process_failure() {
-		if ( empty( $this->results ) || empty( $this->not_valid_actions ) ) {
+		if ( ! count( $this->results ) || ! count( $this->not_valid_actions ) ) {
 			return;
 		}
 
@@ -374,7 +374,7 @@ class WP_Requirements {
 		echo '</p>';
 
 		// Display the link to more details, if we have it.
-		if ( ! empty( $this->requirements_details_url ) ) {
+		if ( $this->requirements_details_url ) {
 			printf(
 				'<p>' . esc_html__( 'Please read more details %s here %s.', $this->locale ) . '</p>',
 				'<a href="' . esc_url( $this->requirements_details_url ) . '">',
@@ -456,7 +456,7 @@ class WP_Requirements {
 					             $cur_version,
 					             $this->version_compare_operator . $this->required[ $type ][ $key ]
 				             );
-			} elseif ( is_array( $value ) && ! empty( $value ) ) {
+			} elseif ( is_array( $value ) && count( $value ) ) {
 				// We need to know - whether we work with PHP extensions or WordPress plugins/theme
 				// Extensions are currently passed as an ordinary numeric (while plugins - associative) array
 				if ( ! $this->is_array_associative( $this->required[ $type ][ $key ] ) ) { // These are extensions.
@@ -595,7 +595,7 @@ class WP_Requirements {
 	 */
 	public function get_plugin( $data = '' ) {
 		// Get all the data.
-		if ( empty( $data ) ) {
+		if ( ! $data ) {
 			return $this->plugin;
 		}
 
@@ -620,7 +620,7 @@ class WP_Requirements {
 			$json_data = file_get_contents( $json_file );
 		}
 
-		return ! empty( $json_data ) ? $this->parse_json( $json_data ) : array();
+		return $json_data ? $this->parse_json( $json_data ) : array();
 	}
 
 	/**
