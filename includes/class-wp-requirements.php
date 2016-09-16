@@ -268,12 +268,6 @@ class WP_Requirements {
 						if ( $plugin && is_string( $plugin ) ) {
 							$required[ $type ][ $plugin ] = $required_version;
 
-							// Check that we don't have a typo in the plugin slug.
-							if ( ! file_exists( trailingslashit( WP_PLUGIN_DIR ) . $plugin ) ) {
-								$result[ $type ][ $plugin ] = false;
-								continue;
-							}
-
 							$is_plugin_active = is_plugin_active( $plugin );
 
 							if ( is_bool( $required_version ) ) {
