@@ -521,8 +521,11 @@ class WP_Requirements {
 								$entity_name = $entity;
 							}
 						} elseif ( 'theme' === $key ) {
-							$entity_data = wp_get_theme();
-							$entity_name = $entity_data->get( 'Name' );
+							$entity_name = $is_valid
+								// Name of the current theme, if valid version.
+								? wp_get_theme()->get( 'Name' )
+								// What's required, string "as-is".
+								: $entity;
 						}
 
 						if ( is_bool( $this->required[ $type ][ $key ][ $entity ] ) ) {
