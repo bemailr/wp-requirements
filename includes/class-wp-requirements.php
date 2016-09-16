@@ -84,6 +84,13 @@ class WP_Requirements {
 	protected $plugin = array();
 
 	/**
+	 * Helps loading translations once for all instances.
+	 *
+	 * @var bool
+	 */
+	protected static $_translations_loaded = false;
+
+	/**
 	 * WP_Requirements constructor.
 	 *
 	 * @param string $the__file__  Pass `__FILE__` from the loader.
@@ -99,6 +106,11 @@ class WP_Requirements {
 		// Requirements can be specified in JSON file.
 		if ( ! count( $requirements ) ) {
 			$requirements = $this->load_json();
+		}
+
+		if ( ! self::$_translations_loaded ) {
+			$this->load_translations();
+			self::$_translations_loaded = true;
 		}
 
 		// Heavy processing here.
@@ -122,6 +134,26 @@ class WP_Requirements {
 
 		$plugin_data          = get_plugin_data( $this->plugin['fullpath'] );
 		$this->plugin['name'] = $plugin_data['Name'];
+	}
+
+	/**
+	 * Load translations.
+	 * Similar to the core function:
+	 *
+	 * @see load_plugin_textdomain
+	 */
+	protected function load_translations() {
+
+		$domain = 'wp-requirements';
+		$locale = get_locale();
+		$mofile = $domain . '-' . $locale . '.mo';
+
+		// Try to load from the languages directory first.
+		if ( ! load_textdomain( $domain, WP_LANG_DIR . '/' . $mofile ) ) {
+			// Then try to load from our languages folder.
+			load_textdomain( $domain, dirname( __FILE__ ) . '/../languages/' . $mofile );
+		}
+
 	}
 
 	/**

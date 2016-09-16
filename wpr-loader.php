@@ -1,6 +1,7 @@
 <?php
 /**
  * File: wpr-loader.php
+ * Domain Path: /languages/
  *
  * @package WP-Requirements
  */
