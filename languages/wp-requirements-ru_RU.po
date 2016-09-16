@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://github.com/bemailr/wp-requirements/issues\n"
-"POT-Creation-Date: 2016-09-16 03:30:25+00:00\n"
+"POT-Creation-Date: 2016-09-16 04:28:07+00:00\n"
 "PO-Revision-Date: 2016-09-15 22:50-0400\n"
 "Last-Translator: Gregory Karpinsky <gregory@tiv.net>\n"
 "Language-Team: The BeMailr Team <support@bemailr.com>\n"
@@ -23,65 +23,66 @@ msgstr ""
 "X-Generator: Poedit 1.8.9\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: includes/class-wp-requirements.php:393
+#: includes/class-wp-requirements.php:387
 msgid ""
-"%s will not function correctly because your site doesn't meet some of the requirements:"
+"%s will not function correctly because your site doesn't meet some of the "
+"requirements:"
 msgstr ""
-"%s не будет работать корректно, потому что ваш сайт не соответствует некоторым "
-"требованиям:"
+"%s не будет работать корректно, потому что ваш сайт не соответствует "
+"некоторым требованиям:"
 
-#: includes/class-wp-requirements.php:402
+#: includes/class-wp-requirements.php:396
 msgid "Please read more details %s here %s."
 msgstr "Пожалуйста читайте подробнее %s здесь %s."
 
-#: includes/class-wp-requirements.php:428
+#: includes/class-wp-requirements.php:422
 msgid "%s: current %s, required %s"
 msgstr "%s: текущая %s, требуется %s"
 
-#: includes/class-wp-requirements.php:429
+#: includes/class-wp-requirements.php:423
 msgid "%s is activated"
-msgstr "%s активировано"
+msgstr "Требуется: %s"
+
+#: includes/class-wp-requirements.php:424
+msgid "%s is not activated"
+msgstr "Требуется: %s"
+
+#: includes/class-wp-requirements.php:425
+msgid "%s is activated and has a required version %s"
+msgstr "Требуется: %s, версии %s"
+
+#: includes/class-wp-requirements.php:426
+msgid "%s version %s must be activated"
+msgstr "Требуется: %s, версия %s"
+
+#: includes/class-wp-requirements.php:429
+msgid "%s must be activated"
+msgstr "Требуется: %s"
 
 #: includes/class-wp-requirements.php:430
-msgid "%s is not activated"
-msgstr "%s не активировано"
-
-#: includes/class-wp-requirements.php:431
-msgid "%s is activated and has a required version %s"
-msgstr "%s активирован и имеет требуемую версию %s"
-
-#: includes/class-wp-requirements.php:432
-msgid "%s version %s must be activated"
-msgstr "Необходимо активировать: %s версии %s"
-
-#: includes/class-wp-requirements.php:435
-msgid "%s must be activated"
-msgstr "Необходимо активировать: %s"
-
-#: includes/class-wp-requirements.php:436
 msgid "%s must NOT be activated"
-msgstr "Необходимо ДЕактивировать: %s"
+msgstr "НЕЛЬЗЯ активировать: %s"
 
-#: includes/class-wp-requirements.php:440
+#: includes/class-wp-requirements.php:434
 msgid "PHP Version"
 msgstr "Версия PHP"
 
-#: includes/class-wp-requirements.php:441
+#: includes/class-wp-requirements.php:435
 msgid "PHP Extension"
 msgstr "Расширение PHP"
 
-#: includes/class-wp-requirements.php:442
+#: includes/class-wp-requirements.php:436
 msgid "MySQL Version"
 msgstr "Версия MySQL"
 
-#: includes/class-wp-requirements.php:443
+#: includes/class-wp-requirements.php:437
 msgid "WordPress Version"
 msgstr "Версия WordPress"
 
-#: includes/class-wp-requirements.php:444
+#: includes/class-wp-requirements.php:438
 msgid "Plugin"
 msgstr "Плагин"
 
-#: includes/class-wp-requirements.php:445
+#: includes/class-wp-requirements.php:439
 msgid "Theme"
 msgstr "Тема"
