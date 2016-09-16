@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://github.com/bemailr/wp-requirements/issues\n"
-"POT-Creation-Date: 2016-09-16 02:47:42+00:00\n"
+"POT-Creation-Date: 2016-09-16 03:55:23+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -23,40 +23,64 @@ msgstr ""
 "X-Poedit-Bookmarks: \n"
 "X-Textdomain-Support: yes\n"
 
-#: includes/class-wp-requirements.php:361
+#: includes/class-wp-requirements.php:393
 msgid ""
-"%s will not function because your site doesn't meet some of the "
+"%s will not function correctly because your site doesn't meet some of the "
 "requirements:"
 msgstr ""
 
-#: includes/class-wp-requirements.php:370
+#: includes/class-wp-requirements.php:402
 msgid "Please read more details %s here %s."
 msgstr ""
 
-#: includes/class-wp-requirements.php:396
+#: includes/class-wp-requirements.php:428
 msgid "%s: current %s, required %s"
 msgstr ""
 
-#: includes/class-wp-requirements.php:397
+#: includes/class-wp-requirements.php:429
 msgid "%s is activated"
 msgstr ""
 
-#: includes/class-wp-requirements.php:398
+#: includes/class-wp-requirements.php:430
 msgid "%s is not activated"
 msgstr ""
 
-#: includes/class-wp-requirements.php:399
+#: includes/class-wp-requirements.php:431
 msgid "%s is activated and has a required version %s"
 msgstr ""
 
-#: includes/class-wp-requirements.php:400
+#: includes/class-wp-requirements.php:432
 msgid "%s version %s must be activated"
 msgstr ""
 
-#: includes/class-wp-requirements.php:403
+#: includes/class-wp-requirements.php:435
 msgid "%s must be activated"
 msgstr ""
 
-#: includes/class-wp-requirements.php:404
+#: includes/class-wp-requirements.php:436
 msgid "%s must NOT be activated"
+msgstr ""
+
+#: includes/class-wp-requirements.php:440
+msgid "PHP Version"
+msgstr ""
+
+#: includes/class-wp-requirements.php:441
+msgid "PHP Extension"
+msgstr ""
+
+#: includes/class-wp-requirements.php:442
+msgid "MySQL Version"
+msgstr ""
+
+#: includes/class-wp-requirements.php:443
+msgid "WordPress Version"
+msgstr ""
+
+#: includes/class-wp-requirements.php:444
+msgid "Plugin"
+msgstr ""
+
+#: includes/class-wp-requirements.php:445
+msgid "Theme"
 msgstr ""

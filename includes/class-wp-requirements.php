@@ -390,7 +390,7 @@ class WP_Requirements {
 		echo '<p>';
 
 		printf(
-			esc_html__( '%s will not function because your site doesn\'t meet some of the requirements:', 'wp-requirements' ),
+			esc_html__( '%s will not function correctly because your site doesn\'t meet some of the requirements:', 'wp-requirements' ),
 			'<strong>' . esc_html( $this->get_plugin( 'name' ) ) . '</strong>'
 		);
 
@@ -436,6 +436,15 @@ class WP_Requirements {
 			false => esc_html__( '%s must NOT be activated', 'wp-requirements' ),
 		);
 
+		$string_section = array(
+			'PHP Version'       => esc_html__( 'PHP Version', 'wp-requirements' ),
+			'PHP Extension'     => esc_html__( 'PHP Extension', 'wp-requirements' ),
+			'MySQL Version'     => esc_html__( 'MySQL Version', 'wp-requirements' ),
+			'WordPress Version' => esc_html__( 'WordPress Version', 'wp-requirements' ),
+			'Plugin'            => esc_html__( 'Plugin', 'wp-requirements' ),
+			'Theme'             => esc_html__( 'Theme', 'wp-requirements' ),
+		);
+
 		$notices = array();
 
 		foreach ( $data as $key => $value ) { // Version : 5.5 || extensions : [curl,mysql].
@@ -475,7 +484,7 @@ class WP_Requirements {
 				$notices[] = $this->get_notice_status_icon( $value ) .
 				             sprintf(
 					             $string_version,
-					             $section,
+					             $string_section[ $section ],
 					             $cur_version,
 					             $this->version_compare_operator . $this->required[ $type ][ $key ]
 				             );
@@ -492,7 +501,7 @@ class WP_Requirements {
 						$notices[] = $this->get_notice_status_icon( $is_valid ) .
 						             sprintf(
 							             $is_valid ? $string_ext_loaded : $string_ext_not_loaded,
-							             $section . ' "' . $entity . '"'
+							             $string_section[ $section ] . ' "' . $entity . '"'
 						             );
 					}
 				} else {
@@ -520,14 +529,14 @@ class WP_Requirements {
 							$notices[] = $this->get_notice_status_icon( $is_valid ) .
 							             sprintf(
 								             $string_must_be_activated[ $this->required[ $type ][ $key ][ $entity ] ],
-								             $section . ' "' . $entity_name . '"'
+								             $string_section[ $section ] . ' "' . $entity_name . '"'
 							             );
 						} else {
 
 							$notices[] = $this->get_notice_status_icon( $is_valid ) .
 							             sprintf(
 								             $is_valid ? $string_wp_loaded : $string_wp_not_loaded,
-								             $section . ' "' . $entity_name . '"',
+								             $string_section[ $section ] . ' "' . $entity_name . '"',
 								             $this->version_compare_operator . $this->required[ $type ][ $key ][ $entity ]
 							             );
 						}
