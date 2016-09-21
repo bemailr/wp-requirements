@@ -1,0 +1,13 @@
+{
+  "default": [
+    "dist"
+  ],
+  "pomo": [
+    "replace:wpi18n",
+    "makepot",
+    "tivwp_po"
+  ],
+  "dist": [
+    "pomo"
+  ]
+}

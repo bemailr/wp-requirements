@@ -42,14 +42,6 @@ class WP_Requirements {
 	public $requirements_details_url = '';
 
 	/**
-	 * Text domain.
-	 *
-	 * @todo Refactor this.
-	 * @var string
-	 */
-	public $locale = 'wp-requirements';
-
-	/**
 	 * Default operator for version comparison.
 	 *
 	 * @var string
@@ -92,6 +84,13 @@ class WP_Requirements {
 	protected $plugin = array();
 
 	/**
+	 * Helps loading translations once for all instances.
+	 *
+	 * @var bool
+	 */
+	protected static $_translations_loaded = false;
+
+	/**
 	 * WP_Requirements constructor.
 	 *
 	 * @param string $the__file__  Pass `__FILE__` from the loader.
@@ -105,8 +104,13 @@ class WP_Requirements {
 		$this->set_plugin( $the__file__ );
 
 		// Requirements can be specified in JSON file.
-		if ( empty( $requirements ) ) {
+		if ( ! count( $requirements ) ) {
 			$requirements = $this->load_json();
+		}
+
+		if ( ! self::$_translations_loaded ) {
+			$this->load_translations();
+			self::$_translations_loaded = true;
 		}
 
 		// Heavy processing here.
@@ -133,12 +137,32 @@ class WP_Requirements {
 	}
 
 	/**
+	 * Load translations.
+	 * Similar to the core function:
+	 *
+	 * @see load_plugin_textdomain
+	 */
+	protected function load_translations() {
+
+		$domain = 'wp-requirements';
+		$locale = get_locale();
+		$mofile = $domain . '-' . $locale . '.mo';
+
+		// Try to load from the languages directory first.
+		if ( ! load_textdomain( $domain, WP_LANG_DIR . '/' . $mofile ) ) {
+			// Then try to load from our languages folder.
+			load_textdomain( $domain, dirname( __FILE__ ) . '/../languages/' . $mofile );
+		}
+
+	}
+
+	/**
 	 * All the requirements will be checked and become accessible here: $this->results.
 	 *
 	 * @param array $requirements Array of requirements.
 	 */
 	protected function validate_requirements( $requirements ) {
-		if ( empty( $requirements ) ) {
+		if ( ! count( $requirements ) ) {
 			return;
 		}
 
@@ -167,7 +191,6 @@ class WP_Requirements {
 	 * @param array $params The array of parameters.
 	 */
 	protected function set_params( $params ) {
-		$this->locale                   = ! empty( $params['locale'] ) ? wp_strip_all_tags( (string) $params['locale'] ) : $this->locale;
 		$this->requirements_details_url = ! empty( $params['requirements_details_url'] ) ? esc_url( trim( (string) $params['requirements_details_url'] ) ) : $this->requirements_details_url;
 		$this->version_compare_operator = ! empty( $params['version_compare_operator'] ) ? (string) $params['version_compare_operator'] : $this->version_compare_operator;
 		$this->not_valid_actions        = ! empty( $params['not_valid_actions'] ) ? (array) $params['not_valid_actions'] : $this->not_valid_actions;
@@ -244,12 +267,6 @@ class WP_Requirements {
 					foreach ( (array) $data as $plugin => $required_version ) {
 						if ( $plugin && is_string( $plugin ) ) {
 							$required[ $type ][ $plugin ] = $required_version;
-
-							// Check that we don't have a typo in the plugin slug.
-							if ( ! file_exists( trailingslashit( WP_PLUGIN_DIR ) . $plugin ) ) {
-								$result[ $type ][ $plugin ] = false;
-								continue;
-							}
 
 							$is_plugin_active = is_plugin_active( $plugin );
 
@@ -337,7 +354,7 @@ class WP_Requirements {
 	 * Get the list of registered actions and do everything defined by them
 	 */
 	public function process_failure() {
-		if ( empty( $this->results ) || empty( $this->not_valid_actions ) ) {
+		if ( ! count( $this->results ) || ! count( $this->not_valid_actions ) ) {
 			return;
 		}
 
@@ -367,23 +384,24 @@ class WP_Requirements {
 		echo '<p>';
 
 		printf(
-			esc_html__( '%s will not function because your site doesn\'t meet some of the requirements:', $this->locale ),
+			esc_html__( '%s will not function correctly because your site doesn\'t meet some of the requirements:', 'wp-requirements' ),
 			'<strong>' . esc_html( $this->get_plugin( 'name' ) ) . '</strong>'
 		);
 
 		echo '</p>';
 
 		// Display the link to more details, if we have it.
-		if ( ! empty( $this->requirements_details_url ) ) {
+		if ( $this->requirements_details_url ) {
 			printf(
-				'<p>' . esc_html__( 'Please read more details %s here %s.', $this->locale ) . '</p>',
+				'<p>' . esc_html__( 'Please read more details %s here %s.', 'wp-requirements' ) . '</p>',
 				'<a href="' . esc_url( $this->requirements_details_url ) . '">',
 				'</a>'
 			);
 		} else { // So we need to display all the failures in a notice.
 			echo '<ul>';
 			foreach ( $this->results as $type => $data ) {
-				echo $this->format_php_mysql_notice( $type, $data ); // WPCS: XSS ok.
+				$notices = $this->php_mysql_notices( $type, $data );
+				echo '<li>' . implode( '</li><li>', $notices ) . '</li>'; // WPCS: XSS ok.
 			}
 			echo '</ul>';
 
@@ -398,21 +416,30 @@ class WP_Requirements {
 	 * @param string $type What's the type of the data: php or mysql.
 	 * @param array  $data Contains version and extensions keys with their values.
 	 *
-	 * @return string $result
+	 * @return string[]
 	 */
-	protected function format_php_mysql_notice( $type, $data ) {
-		$string_version        = __( '%s: current %s, required %s', $this->locale );
-		$string_ext_loaded     = __( '%s is activated', $this->locale );
-		$string_ext_not_loaded = __( '%s is not activated', $this->locale );
-		$string_wp_loaded      = __( '%s is activated and has a required version %s', $this->locale );
-		$string_wp_not_loaded  = __( '%s version %s must be activated', $this->locale );
+	protected function php_mysql_notices( $type, $data ) {
+		$string_version        = esc_html__( '%s: current %s, required %s', 'wp-requirements' );
+		$string_ext_loaded     = esc_html__( '%s is activated', 'wp-requirements' );
+		$string_ext_not_loaded = esc_html__( '%s is not activated', 'wp-requirements' );
+		$string_wp_loaded      = esc_html__( '%s is activated and has a required version %s', 'wp-requirements' );
+		$string_wp_not_loaded  = esc_html__( '%s version %s must be activated', 'wp-requirements' );
 
 		$string_must_be_activated = array(
-			true  => esc_html__( '%s must be activated', $this->locale ),
-			false => esc_html__( '%s must NOT be activated', $this->locale ),
+			true  => esc_html__( '%s must be activated', 'wp-requirements' ),
+			false => esc_html__( '%s must NOT be activated', 'wp-requirements' ),
 		);
 
-		$message = array();
+		$string_section = array(
+			'PHP Version'       => esc_html__( 'PHP Version', 'wp-requirements' ),
+			'PHP Extension'     => esc_html__( 'PHP Extension', 'wp-requirements' ),
+			'MySQL Version'     => esc_html__( 'MySQL Version', 'wp-requirements' ),
+			'WordPress Version' => esc_html__( 'WordPress Version', 'wp-requirements' ),
+			'Plugin'            => esc_html__( 'Plugin', 'wp-requirements' ),
+			'Theme'             => esc_html__( 'Theme', 'wp-requirements' ),
+		);
+
+		$notices = array();
 
 		foreach ( $data as $key => $value ) { // Version : 5.5 || extensions : [curl,mysql].
 			$section = $cur_version = '';
@@ -448,14 +475,14 @@ class WP_Requirements {
 
 			// Ordinary bool meant this is just a 'version'.
 			if ( is_bool( $value ) && ( ! $value || $this->show_valid_results ) ) {
-				$message[] = $this->get_notice_status_icon( $value ) .
+				$notices[] = $this->get_notice_status_icon( $value ) .
 				             sprintf(
 					             $string_version,
-					             $section,
+					             $string_section[ $section ],
 					             $cur_version,
 					             $this->version_compare_operator . $this->required[ $type ][ $key ]
 				             );
-			} elseif ( is_array( $value ) && ! empty( $value ) ) {
+			} elseif ( is_array( $value ) && count( $value ) ) {
 				// We need to know - whether we work with PHP extensions or WordPress plugins/theme
 				// Extensions are currently passed as an ordinary numeric (while plugins - associative) array
 				if ( ! $this->is_array_associative( $this->required[ $type ][ $key ] ) ) { // These are extensions.
@@ -465,10 +492,10 @@ class WP_Requirements {
 							continue;
 						}
 
-						$message[] = $this->get_notice_status_icon( $is_valid ) .
+						$notices[] = $this->get_notice_status_icon( $is_valid ) .
 						             sprintf(
 							             $is_valid ? $string_ext_loaded : $string_ext_not_loaded,
-							             $section . ' "' . $entity . '"'
+							             $string_section[ $section ] . ' "' . $entity . '"'
 						             );
 					}
 				} else {
@@ -488,22 +515,25 @@ class WP_Requirements {
 								$entity_name = $entity;
 							}
 						} elseif ( 'theme' === $key ) {
-							$entity_data = wp_get_theme();
-							$entity_name = $entity_data->get( 'Name' );
+							$entity_name = $is_valid
+								// Name of the current theme, if valid version.
+								? wp_get_theme()->get( 'Name' )
+								// What's required, string "as-is".
+								: $entity;
 						}
 
 						if ( is_bool( $this->required[ $type ][ $key ][ $entity ] ) ) {
-							$message[] = $this->get_notice_status_icon( $is_valid ) .
+							$notices[] = $this->get_notice_status_icon( $is_valid ) .
 							             sprintf(
 								             $string_must_be_activated[ $this->required[ $type ][ $key ][ $entity ] ],
-								             $section . ' "' . $entity_name . '"'
+								             $string_section[ $section ] . ' "' . $entity_name . '"'
 							             );
 						} else {
 
-							$message[] = $this->get_notice_status_icon( $is_valid ) .
+							$notices[] = $this->get_notice_status_icon( $is_valid ) .
 							             sprintf(
 								             $is_valid ? $string_wp_loaded : $string_wp_not_loaded,
-								             $section . ' "' . $entity_name . '"',
+								             $string_section[ $section ] . ' "' . $entity_name . '"',
 								             $this->version_compare_operator . $this->required[ $type ][ $key ][ $entity ]
 							             );
 						}
@@ -512,7 +542,7 @@ class WP_Requirements {
 			}
 		} // endforeach
 
-		return '<li>' . implode( '</li><li>', $message ) . '</li>';
+		return $notices;
 	}
 
 	/**
@@ -594,7 +624,7 @@ class WP_Requirements {
 	 */
 	public function get_plugin( $data = '' ) {
 		// Get all the data.
-		if ( empty( $data ) ) {
+		if ( ! $data ) {
 			return $this->plugin;
 		}
 
@@ -619,7 +649,7 @@ class WP_Requirements {
 			$json_data = file_get_contents( $json_file );
 		}
 
-		return ! empty( $json_data ) ? $this->parse_json( $json_data ) : array();
+		return $json_data ? $this->parse_json( $json_data ) : array();
 	}
 
 	/**
