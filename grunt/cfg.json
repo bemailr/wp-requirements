@@ -1,0 +1,9 @@
+{
+  "text_domain": "wp-requirements",
+  "version": {
+    "define": "WP_REQUIREMENTS_VERSION"
+  },
+  "path": {
+    "languages": "languages"
+  }
+}

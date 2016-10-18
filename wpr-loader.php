@@ -15,14 +15,14 @@
  * Convention: no 2.1.123 and no 2.1.2.1 versions.
  */
 
-if ( ! function_exists( 'wp_requirements_class_loader_20002' ) ) :
+if ( ! function_exists( 'wp_requirements_class_loader_20003' ) ) :
 
-	add_action( 'plugins_loaded', 'wp_requirements_class_loader_20002', - 20002 );
+	add_action( 'plugins_loaded', 'wp_requirements_class_loader_20003', - 20003 );
 
 	/**
 	 * Load class if not loaded already.
 	 */
-	function wp_requirements_class_loader_20002() {
+	function wp_requirements_class_loader_20003() {
 
 		if ( ! class_exists( 'WP_Requirements', false ) ) {
 			require_once dirname( __FILE__ ) . '/includes/class-wp-requirements.php';

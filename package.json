@@ -1,16 +1,7 @@
 {
   "name": "wp-requirements",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "title": "WP Requirements",
-  "tivwp_config": {
-    "text_domain": "wp-requirements",
-    "version": {
-      "define": "WP_REQUIREMENTS_VERSION"
-    },
-    "path": {
-      "languages": "languages"
-    }
-  },
   "description": "Providing WordPress developers with the ability to check server and WordPress conditions for satisfying their plugins' requirements.",
   "homepage": "https://bemailr.github.io/wp-requirements/",
   "repository": {
@@ -20,7 +11,7 @@
   "bugs": {
     "url": "https://github.com/bemailr/wp-requirements/issues"
   },
-  "author": "The BeMailr Team",
+  "author": "The Bemailr Team",
   "license": "GPL-3.0",
   "main": "Gruntfile.js",
   "devDependencies": {

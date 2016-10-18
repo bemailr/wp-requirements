@@ -1,0 +1,8 @@
+.gitattributes export-ignore
+.github export-ignore
+.gitignore export-ignore
+.scrutinizer.yml export-ignore
+grunt export-ignore
+composer.json export-ignore
+Gruntfile.js export-ignore
+package.json export-ignore

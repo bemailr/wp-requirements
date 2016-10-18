@@ -10,7 +10,7 @@ module.exports = {
             processPot: function (pot) {
                 "use strict";
                 pot.headers["report-msgid-bugs-to"] = "https://github.com/bemailr/wp-requirements/issues";
-                pot.headers["language-team"] = "The BeMailr Team <support@bemailr.com>";
+                pot.headers["language-team"] = "The Bemailr Team <translations@bemailr.com>";
                 pot.headers["last-translator"] = pot.headers["language-team"];
                 delete pot.headers["x-generator"];
                 return pot;

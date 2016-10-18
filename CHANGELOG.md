@@ -3,6 +3,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.3] 2016-10-18
+
+### Changed
+- Exclude development files from distribution (Composer "dist").
+
+### Internal
+- Grunt cleanup.
+
 ## [2.0.2] 2016-09-21
 ### Added
 - String translations (PO/MO) and a Grunt script to generate them.

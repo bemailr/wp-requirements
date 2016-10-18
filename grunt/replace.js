@@ -13,11 +13,7 @@
  * There is no support for Grunt templates in the `from:` replacement.
  * Therefore, we need to get the config variable ourselves.
  */
-var pkgJson;
-var tivwp_version_define;
-pkgJson = require("../package.json");
-//noinspection JSUnresolvedVariable
-tivwp_version_define = pkgJson.tivwp_config.version.define;
+var cfgJson = require("./cfg.json");
 
 module.exports = {
     version: {
@@ -29,7 +25,7 @@ module.exports = {
                 to: " * Version: <%= package.version %>"
             },
             {
-                from: new RegExp("define\\( '(" + tivwp_version_define + ")'.+"),
+                from: new RegExp("define\\( '(" + cfgJson.version.define + ")'.+"),
                 to: "define( '$1', '<%= package.version %>' );"
             }
         ]
@@ -39,8 +35,8 @@ module.exports = {
         src: ["node_modules/grunt-wp-i18n/vendor/wp-i18n-tools/extract.php"],
         replacements: [
             {
-                from: new RegExp("public function entry_from_call\( \$call, \$file_name \) \{.*"),
-                to: "public function entry_from_call( $call, $file_name ) { if ( $call['args'][ count( $call['args'] ) - 1 ] !== '<%= package.tivwp_config.text_domain %>' ) { return null; }"
+                from: "public function entry_from_call( $call, $file_name ) {",
+                to: "public function entry_from_call( $call, $file_name ) { if ( $call['args'][ count( $call['args'] ) - 1 ] !== '<%= cfg.text_domain %>' ) { return null; }"
             }
         ]
     }
